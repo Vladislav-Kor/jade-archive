@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>Archive Registry by Korchagin | A.R.K.</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <button id="mobileMenuToggle" class="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <!-- Sidebar -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <div class="logo-icon"><i class="fas fa-folder-tree"></i></div>
+            <div class="logo-text">
+              <h1>A.R.K.</h1>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-wrapper">
+          <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Поиск контактов..."
+              class="search-input"
+            />
+            <i class="fas fa-sliders-h filter-icon"></i>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <i class="fas fa-users stat-icon"></i>
+            <div class="stat-value" id="totalCount">0</div>
+            <div class="stat-label">Контактов</div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-link stat-icon"></i>
+            <div class="stat-value" id="relationsCount">0</div>
+            <div class="stat-label">Связей</div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-folder-open stat-icon"></i>
+            <div class="stat-value" id="casesCount">0</div>
+            <div class="stat-label">Дел</div>
+          </div>
+        </div>
+
+        <!-- Sorting Panel -->
+        <div class="sorting-panel">
+          <div class="sorting-header">
+            <i class="fas fa-sort-amount-down"></i><span>Сортировка</span>
+          </div>
+          <div class="sorting-buttons">
+            <button class="sort-btn active" data-sort="importance">
+              <i class="fas fa-star"></i> По важности
+            </button>
+            <button class="sort-btn" data-sort="hierarchy">
+              <i class="fas fa-sitemap"></i> По иерархии
+            </button>
+            <button class="sort-btn" data-sort="date">
+              <i class="fas fa-clock"></i> По дате
+            </button>
+            <button class="sort-btn" data-sort="name">
+              <i class="fas fa-font"></i> По имени
+            </button>
+          </div>
+        </div>
+
+        <!-- Tree -->
+        <div class="tree-container">
+          <div class="tree-header">
+            <span>Структура контактов</span
+            ><button class="tree-refresh" onclick="loadTree()">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+          <div id="tree" class="tree-wrapper"></div>
+        </div>
+
+        <!-- Add Button -->
+        <div class="sidebar-footer">
+          <button class="btn-primary btn-block" onclick="openPersonModal()">
+            <i class="fas fa-plus"></i><span>Новый контакт</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main id="mainContent" class="main-content">
+        <div class="welcome-screen">
+          <div class="welcome-icon">
+            <i class="fas fa-folder-open"></i>
+            <div class="welcome-pulse"></div>
+          </div>
+          <h2>Добро пожаловать в A.R.K.</h2>
+          <p>Выберите контакт из списка слева, чтобы просмотреть досье</p>
+          <div class="welcome-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Person Modal -->
+    <div id="personModal" class="modal">
+      <div class="modal-overlay" onclick="closeModal('personModal')"></div>
+      <div class="modal-container modal-lg">
+        <div class="modal-header">
+          <h3 id="personModalTitle">
+            <i class="fas fa-user-plus"></i> Новый контакт
+          </h3>
+          <button class="modal-close" onclick="closeModal('personModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="personForm" class="modal-body">
+          <!-- Основная информация -->
+          <div class="form-section">
+            <h4><i class="fas fa-info-circle"></i> Основная информация</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-user"></i> Полное имя *</label
+                ><input
+                  type="text"
+                  name="full_name"
+                  required
+                  placeholder="Иванов Иван Иванович"
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-tag"></i> Короткое имя *</label
+                ><input
+                  type="text"
+                  name="short_name"
+                  required
+                  placeholder="ivan"
+                /><small>Уникальный идентификатор</small>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Дата рождения</label
+                ><input type="date" name="birth_date" />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-venus-mars"></i> Пол</label
+                ><select name="gender">
+                  <option value="">Не указан</option>
+                  <option value="male">Мужской</option>
+                  <option value="female">Женский</option>
+                  <option value="other">Другой</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-phone"></i> Телефон</label
+                ><input
+                  type="tel"
+                  name="phone"
+                  placeholder="+7 XXX XXX-XX-XX"
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email</label
+                ><input
+                  type="email"
+                  name="email"
+                  placeholder="mail@example.com"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-map-marker-alt"></i> Адрес</label
+              ><textarea
+                name="address"
+                rows="2"
+                placeholder="Город, улица, дом..."
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Параметры тела -->
+          <div class="form-section">
+            <h4><i class="fas fa-ruler"></i> Параметры тела</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-arrow-up"></i> Рост (см)</label
+                ><input type="number" name="height" placeholder="170" />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-weight-hanging"></i> Вес (кг)</label
+                ><input type="number" name="weight" placeholder="70" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-tshirt"></i> Размер одежды</label
+                ><input
+                  type="text"
+                  name="clothing_size"
+                  placeholder="M, L, XL, 46..."
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-shoe-prints"></i> Размер обуви</label
+                ><input type="number" name="shoe_size" placeholder="42" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-arrows-alt-h"></i> Объем груди</label
+                ><input type="number" name="chest_size" placeholder="96" />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-arrows-alt-v"></i> Объем талии</label
+                ><input type="number" name="waist_size" placeholder="80" />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-arrows-alt"></i> Объем бедер</label
+                ><input type="number" name="hip_size" placeholder="96" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Медицинские данные -->
+          <div class="form-section">
+            <h4><i class="fas fa-heartbeat"></i> Медицинские данные</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-tint"></i> Группа крови</label
+                ><select name="blood_type">
+                  <option value="">Не указана</option>
+                  <option value="A+">A+ (II+)</option>
+                  <option value="A-">A- (II-)</option>
+                  <option value="B+">B+ (III+)</option>
+                  <option value="B-">B- (III-)</option>
+                  <option value="AB+">AB+ (IV+)</option>
+                  <option value="AB-">AB- (IV-)</option>
+                  <option value="O+">O+ (I+)</option>
+                  <option value="O-">O- (I-)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-heart"></i> Резус-фактор</label
+                ><select name="rh_factor">
+                  <option value="">Не указан</option>
+                  <option value="positive">Положительный</option>
+                  <option value="negative">Отрицательный</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-allergies"></i> Аллергии</label
+              ><textarea
+                name="allergies"
+                rows="2"
+                placeholder="Пенициллин, пыльца, орехи..."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label
+                ><i class="fas fa-disease"></i> Хронические заболевания</label
+              ><textarea
+                name="chronic_diseases"
+                rows="2"
+                placeholder="Гипертония, диабет..."
+              ></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label
+                  ><i class="fas fa-capsules"></i> Принимаемые лекарства</label
+                ><input
+                  type="text"
+                  name="medications"
+                  placeholder="Аспирин, витамины..."
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-tachometer-alt"></i> Давление</label
+                ><input
+                  type="text"
+                  name="blood_pressure"
+                  placeholder="120/80"
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-heartbeat"></i> Пульс</label
+                ><input type="number" name="heart_rate" placeholder="72" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Документы -->
+          <div class="form-section">
+            <h4><i class="fas fa-id-card"></i> Документы</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-passport"></i> Паспорт</label
+                ><input
+                  type="text"
+                  name="passport_number"
+                  placeholder="XXXX XXXXXX"
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-file-invoice"></i> ИНН</label
+                ><input type="text" name="inn" placeholder="XXXXXXXXXXXX" />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-file-contract"></i> СНИЛС</label
+                ><input type="text" name="snils" placeholder="XXX-XXX-XXX XX" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-car"></i> Категория прав</label
+                ><input
+                  type="text"
+                  name="driver_license_category"
+                  placeholder="A, B, C, D, E"
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-id-card"></i> Номер прав</label
+                ><input
+                  type="text"
+                  name="driver_license_number"
+                  placeholder="XX XX XXXXXX"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Социальные параметры -->
+          <div class="form-section">
+            <h4><i class="fas fa-users"></i> Социальные параметры</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-ring"></i> Семейное положение</label
+                ><select name="marital_status">
+                  <option value="">Не указано</option>
+                  <option value="single">Холост/Не замужем</option>
+                  <option value="married">Женат/Замужем</option>
+                  <option value="divorced">Разведен(а)</option>
+                  <option value="widowed">Вдовец/Вдова</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-child"></i> Количество детей</label>
+                <div class="form-group">
+                  <label><i class="fas fa-child"></i> Количество детей</label>
+                  <input
+                    type="number"
+                    name="children_count"
+                    min="0"
+                    value="0"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-graduation-cap"></i> Образование</label
+                ><input
+                  type="text"
+                  name="education"
+                  placeholder="Высшее, МГУ..."
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-briefcase"></i> Профессия</label
+                ><input
+                  type="text"
+                  name="profession"
+                  placeholder="Врач, инженер..."
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-building"></i> Место работы</label
+                ><input
+                  type="text"
+                  name="workplace"
+                  placeholder="ООО Ромашка"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Предпочтения -->
+          <div class="form-section">
+            <h4><i class="fas fa-heart"></i> Предпочтения</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-palette"></i> Любимый цвет</label
+                ><input
+                  type="text"
+                  name="favorite_color"
+                  placeholder="Синий, зеленый..."
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-seedling"></i> Любимые цветы</label
+                ><input
+                  type="text"
+                  name="favorite_flowers"
+                  placeholder="Розы, тюльпаны..."
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-utensils"></i> Любимая еда</label
+                ><input
+                  type="text"
+                  name="favorite_food"
+                  placeholder="Суши, пицца..."
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-music"></i> Любимая музыка</label
+                ><input
+                  type="text"
+                  name="favorite_music"
+                  placeholder="Рок, джаз..."
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-film"></i> Любимые фильмы</label
+                ><input
+                  type="text"
+                  name="favorite_movies"
+                  placeholder="Интерстеллар, Матрица..."
+                />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-gamepad"></i> Хобби</label
+                ><input
+                  type="text"
+                  name="hobbies"
+                  placeholder="Шахматы, рисование..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Важность и заметки -->
+          <div class="form-section">
+            <h4><i class="fas fa-star"></i> Важность</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Уровень важности</label
+                ><select name="importance_level" id="importanceLevelSelect">
+                  <option value="low">🟢 Низкая (1)</option>
+                  <option value="medium" selected>🟡 Средняя (5)</option>
+                  <option value="high">🟠 Высокая (8)</option>
+                  <option value="critical">🔴 Критическая (10)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Приоритет (0-10)</label
+                ><input
+                  type="range"
+                  id="importanceSlider"
+                  min="0"
+                  max="10"
+                  step="1"
+                  value="5"
+                />
+                <div
+                  class="importance-value text-center text-sm mt-1"
+                  id="importanceValue"
+                >
+                  5
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-sticky-note"></i> Заметки</label
+              ><textarea
+                name="notes"
+                rows="3"
+                placeholder="Дополнительная информация..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="closeModal('personModal')"
+            >
+              Отмена
+            </button>
+            <button type="submit" class="btn-primary">Сохранить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Relation Modal -->
+    <div id="relationModal" class="modal">
+      <div class="modal-overlay" onclick="closeModal('relationModal')"></div>
+      <div class="modal-container modal-sm">
+        <div class="modal-header">
+          <h3><i class="fas fa-link"></i> Добавление связи</h3>
+          <button class="modal-close" onclick="closeModal('relationModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="relationForm" class="modal-body">
+          <div class="form-group">
+            <label><i class="fas fa-user-friends"></i> Выберите контакт</label
+            ><select id="relationChildId" required>
+              <option value="">-- Выберите контакт --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-heart"></i> Тип связи</label
+            ><input
+              type="text"
+              id="relationType"
+              required
+              placeholder="Друг, Коллега, Родственник..."
+            />
+            <div class="relation-badges">
+              <span class="badge" data-relation="Друг">👥 Друг</span
+              ><span class="badge" data-relation="Коллега">💼 Коллега</span
+              ><span class="badge" data-relation="Родственник"
+                >👪 Родственник</span
+              ><span class="badge" data-relation="Врач">⚕️ Врач</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="closeModal('relationModal')"
+            >
+              Отмена</button
+            ><button type="submit" class="btn-primary">Добавить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Social Modal -->
+    <div id="socialModal" class="modal">
+      <div class="modal-overlay" onclick="closeModal('socialModal')"></div>
+      <div class="modal-container modal-sm">
+        <div class="modal-header">
+          <h3><i class="fas fa-share-alt"></i> Добавить соцсеть</h3>
+          <button class="modal-close" onclick="closeModal('socialModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="socialForm" class="modal-body">
+          <div class="form-group">
+            <label><i class="fas fa-globe"></i> Платформа</label>
+            <div class="social-platforms">
+              <button
+                type="button"
+                class="platform-btn"
+                data-platform="Telegram"
+              >
+                <i class="fab fa-telegram"></i> Telegram</button
+              >
+              ><button
+                type="button"
+                class="platform-btn"
+                data-platform="WhatsApp"
+              >
+                <i class="fab fa-whatsapp"></i> WhatsApp</button
+              ><button type="button" class="platform-btn" data-platform="VK">
+                <i class="fab fa-vk"></i> VK
+              </button>
+            </div>
+            <input
+              type="text"
+              id="socialPlatform"
+              placeholder="Или введите название"
+              class="mt-2"
+            />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-link"></i> Ссылка</label
+            ><input type="url" id="socialLink" placeholder="https://..." />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="closeModal('socialModal')"
+            >
+              Отмена</button
+            ><button type="submit" class="btn-primary">Добавить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Case Modal -->
+    <div id="caseModal" class="modal">
+      <div class="modal-overlay" onclick="closeModal('caseModal')"></div>
+      <div class="modal-container modal-sm">
+        <div class="modal-header">
+          <h3><i class="fas fa-briefcase"></i> Добавить дело</h3>
+          <button class="modal-close" onclick="closeModal('caseModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="caseForm" class="modal-body">
+          <div class="form-group">
+            <label><i class="fas fa-tag"></i> Тип дела</label
+            ><select id="caseType" required>
+              <option value="project">Проект</option>
+              <option value="task">Задача</option>
+              <option value="incident">Инцидент</option>
+              <option value="contract">Договор</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-heading"></i> Название</label
+            ><input
+              type="text"
+              id="caseTitle"
+              required
+              placeholder="Название дела"
+            />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-align-left"></i> Описание</label
+            ><textarea
+              id="caseDescription"
+              rows="3"
+              placeholder="Описание..."
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-flag"></i> Приоритет</label
+              ><select id="casePriority">
+                <option value="low">Низкий</option>
+                <option value="medium" selected>Средний</option>
+                <option value="high">Высокий</option>
+                <option value="critical">Критический</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-calendar"></i> Срок</label
+              ><input type="date" id="caseDueDate" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="closeModal('caseModal')"
+            >
+              Отмена</button
+            ><button type="submit" class="btn-primary">Добавить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Medical Record Modal -->
+    <div id="medicalModal" class="modal">
+      <div class="modal-overlay" onclick="closeModal('medicalModal')"></div>
+      <div class="modal-container modal-sm">
+        <div class="modal-header">
+          <h3><i class="fas fa-notes-medical"></i> Медицинская запись</h3>
+          <button class="modal-close" onclick="closeModal('medicalModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="medicalForm" class="modal-body">
+          <div class="form-group">
+            <label><i class="fas fa-file-medical"></i> Тип записи</label
+            ><select id="medicalType" required>
+              <option value="analysis">Анализ</option>
+              <option value="diagnosis">Диагноз</option>
+              <option value="vaccination">Прививка</option>
+              <option value="examination">Осмотр</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-heading"></i> Название</label
+            ><input
+              type="text"
+              id="medicalTitle"
+              required
+              placeholder="Название"
+            />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-align-left"></i> Описание</label
+            ><textarea
+              id="medicalDescription"
+              rows="3"
+              placeholder="Описание..."
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-calendar"></i> Дата</label
+              ><input type="date" id="medicalDate" />
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-user-md"></i> Врач</label
+              ><input type="text" id="medicalDoctor" placeholder="ФИО врача" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="closeModal('medicalModal')"
+            >
+              Отмена</button
+            ><button type="submit" class="btn-primary">Сохранить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal">
+      <div class="modal-overlay" onclick="closeModal('confirmModal')"></div>
+      <div class="modal-container modal-xs">
+        <div class="modal-header">
+          <h3><i class="fas fa-exclamation-triangle"></i> Подтверждение</h3>
+          <button class="modal-close" onclick="closeModal('confirmModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body text-center">
+          <div class="confirm-icon"><i class="fas fa-question-circle"></i></div>
+          <p id="confirmMessage">Вы уверены?</p>
+        </div>
+        <div class="modal-footer justify-center">
+          <button class="btn-secondary" onclick="closeModal('confirmModal')">
+            Отмена</button
+          ><button id="confirmActionBtn" class="btn-danger">Удалить</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+    <script src="/js/app.js"></script>
+  </body>
+</html>

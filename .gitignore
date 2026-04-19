@@ -1,0 +1,366 @@
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+*.egg-info/
+*.egg
+dist/
+build/
+eggs/
+.eggs/
+share/python-wheels/
+
+# ============================================
+# Базы данных
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+*.db3
+*.pgsql
+*.sql
+*.dump
+*.bak
+backups/
+*.backup
+*.sql.gz
+
+# ============================================
+# Данные приложения (ВАЖНО!)
+# ============================================
+uploads/
+media/
+photos/
+avatars/
+files/
+documents/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.mp4
+*.mp3
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+
+# ============================================
+# Конфигурационные файлы с секретами
+# ============================================
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+.env.*.local
+*.env
+config.ini
+secrets.yaml
+secrets.json
+credentials.json
+token.json
+*.pem
+*.key
+*.crt
+*.p12
+
+# ============================================
+# Telegram бот (токены)
+# ============================================
+bot_token.txt
+telegram_token.txt
+*.token
+!requirements.txt
+
+# ============================================
+# Docker
+# ============================================
+*.log
+*.pid
+docker-compose.override.yml
+docker-compose.*.yml
+!.dockerignore
+.dockerignore
+
+# ============================================
+# IDE и редакторы
+# ============================================
+# VS Code
+.vscode/
+*.code-workspace
+.vscode-test/
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+.venv
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.~*
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================
+# Логи и отладочные файлы
+# ============================================
+*.log
+logs/
+log/
+*.pid
+*.seed
+*.pid.lock
+*.rnd
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ============================================
+# Файлы отчетов и временные файлы
+# ============================================
+*.tmp
+*.temp
+*.cache
+.cache/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# Тесты и покрытие
+# ============================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+pyrightconfig.json
+.pytest_cache/
+.ruff_cache/
+
+# ============================================
+# Jupyter Notebook
+# ============================================
+.ipynb_checkpoints/
+*.ipynb
+
+# ============================================
+# Файлы профилирования
+# ============================================
+*.prof
+*.lprof
+profile_results/
+benchmark_results/
+
+# ============================================
+# Архивы и дистрибутивы
+# ============================================
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.exe
+*.msi
+*.dmg
+*.pkg
+
+# ============================================
+# Резервные копии
+# ============================================
+*.backup
+*.old
+*.orig
+*.rej
+*-backup
+backup_*
+*.save
+
+# ============================================
+# Файлы специфичные для проекта
+# ============================================
+# PostgreSQL данные (если смонтированы локально)
+postgres_data/
+pgdata/
+
+# Redis данные
+redis_data/
+*.rdb
+*.aof
+
+# Nginx кэш
+nginx_cache/
+
+# Traefik данные
+acme.json
+traefik/acme.json
+
+# ============================================
+# Frontend
+# ============================================
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+yarn.lock
+dist/
+build/
+.next/
+out/
+.cache/
+.parcel-cache/
+
+# ============================================
+# Tailwind CSS (если используется локально)
+# ============================================
+*.css.map
+tailwind.output.css
+
+# ============================================
+# Секретные ключи
+# ============================================
+*.key
+*.pem
+*.crt
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+secret_key.txt
+private_key.txt
+jwtRS256.key
+
+# ============================================
+# Аналитика и мониторинг
+# ============================================
+*.sentry
+sentry/
+sentry-event-id*
+.sentry-native/
+
+# ============================================
+# Конфигурация pre-commit
+# ============================================
+.pre-commit-config.yaml.local
+.pre-commit/
+
+# ============================================
+# Файлы сессий
+# ============================================
+.session
+.flask_session/
+.django_session/
+session_data/
+
+# ============================================
+# Докер-специфичные исключения
+# ============================================
+# Игнорируем временные Dockerfile
+Dockerfile.*.tmp
+docker-compose.*.tmp
+
+# ============================================
+# Системные файлы
+# ============================================
+.directory
+.dirstamp
+.dirstamp
+.tern-project
+.tern-port
+.quokka
+*codekit-config.json
+.project
+.classpath
+.factorypath
+.settings/
+*.launch
+*.tmproj
+*.tmTheme
+
+# ============================================
+# Файлы пользовательских данных (ВАЖНО!)
+# ============================================
+# Ниже перечислены файлы, которые могут содержать персональные данные
+# Убедитесь, что эти файлы не попадают в репозиторий
+
+# Данные контактов в текстовом формате
+contacts_export.json
+contacts_export.csv
+persons_export.json
+persons_export.csv
+
+# Резервные копии базы данных (не загружайте их!)
+backup_*.sql
+db_backup_*.sql
+database_backup_*.sql
+
+# Логи пользовательских действий
+user_actions.log
+audit.log
+access.log
+error.log
+
+# Экспортированные PDF/Excel файлы
+exports/*.pdf
+exports/*.xlsx
+exports/*.csv
+reports/*.pdf
+reports/*.xlsx
+
+# Фотографии и файлы пользователей
+static/uploads/*
+media/users/*
+
+# ============================================
+# Исключения для файлов, которые должны быть в репозитории
+# ============================================
+!requirements.txt
+!docker-compose.yml
+!.env.example
+!README.md
+!LICENSE
+!.gitkeep
+
+# ============================================
+# Конфигурация окружения (примеры)
+# ============================================
+# Примеры конфигов можно хранить, но без реальных данных
+.env.example
+config.example.py
+settings.example.py
