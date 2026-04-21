@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc
+from datetime import datetime
 import models, schemas
 
 def get_person(db: Session, person_id: int):
@@ -41,6 +42,8 @@ def delete_person(db: Session, person_id: int):
         db.query(models.SocialMedia).filter(models.SocialMedia.person_id == person_id).delete()
         # Delete related tags
         db.query(models.TagPreference).filter(models.TagPreference.person_id == person_id).delete()
+        # Delete related digital accounts
+        db.query(models.DigitalAccount).filter(models.DigitalAccount.person_id == person_id).delete()
         # Delete person
         db.delete(db_person)
         db.commit()
@@ -146,3 +149,45 @@ def build_tree(db: Session, parent_id: int = 1):
         root.children.append(child_node)
     
     return root
+
+# ============================================
+# Digital Account CRUD
+# ============================================
+
+def get_digital_accounts(db: Session, person_id: int):
+    """Получить все цифровые аккаунты человека"""
+    return db.query(models.DigitalAccount).filter(
+        models.DigitalAccount.person_id == person_id
+    ).order_by(models.DigitalAccount.platform_type).all()
+
+def get_digital_account(db: Session, account_id: int):
+    """Получить аккаунт по ID"""
+    return db.query(models.DigitalAccount).filter(models.DigitalAccount.id == account_id).first()
+
+def create_digital_account(db: Session, person_id: int, account: schemas.DigitalAccountCreate):
+    """Создать новый цифровой аккаунт"""
+    db_account = models.DigitalAccount(person_id=person_id, **account.model_dump())
+    db.add(db_account)
+    db.commit()
+    db.refresh(db_account)
+    return db_account
+
+def update_digital_account(db: Session, account_id: int, account: schemas.DigitalAccountUpdate):
+    """Обновить цифровой аккаунт"""
+    db_account = get_digital_account(db, account_id)
+    if db_account:
+        for key, value in account.model_dump().items():
+            setattr(db_account, key, value)
+        db_account.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(db_account)
+    return db_account
+
+def delete_digital_account(db: Session, account_id: int):
+    """Удалить цифровой аккаунт"""
+    db_account = get_digital_account(db, account_id)
+    if db_account:
+        db.delete(db_account)
+        db.commit()
+        return True
+    return False

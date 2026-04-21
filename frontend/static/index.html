@@ -62,9 +62,9 @@
             <div class="stat-label">Связей</div>
           </div>
           <div class="stat-card">
-            <i class="fas fa-folder-open stat-icon"></i>
-            <div class="stat-value" id="casesCount">0</div>
-            <div class="stat-label">Дел</div>
+            <i class="fas fa-gamepad stat-icon"></i>
+            <div class="stat-value" id="accountsCount">0</div>
+            <div class="stat-label">Аккаунтов</div>
           </div>
         </div>
 
@@ -373,7 +373,6 @@
               <div class="form-group">
                 <label><i class="fas fa-child"></i> Количество детей</label>
                 <div class="form-group">
-                  <label><i class="fas fa-child"></i> Количество детей</label>
                   <input
                     type="number"
                     name="children_count"
@@ -592,7 +591,7 @@
               >
                 <i class="fab fa-telegram"></i> Telegram</button
               >
-              ><button
+              <button
                 type="button"
                 class="platform-btn"
                 data-platform="WhatsApp"
@@ -626,126 +625,183 @@
       </div>
     </div>
 
-    <!-- Case Modal -->
-    <div id="caseModal" class="modal">
-      <div class="modal-overlay" onclick="closeModal('caseModal')"></div>
-      <div class="modal-container modal-sm">
+    <!-- Digital Account Modal -->
+    <div id="digitalAccountModal" class="modal">
+      <div class="modal-overlay" onclick="closeModal('digitalAccountModal')"></div>
+      <div class="modal-container modal-lg">
         <div class="modal-header">
-          <h3><i class="fas fa-briefcase"></i> Добавить дело</h3>
-          <button class="modal-close" onclick="closeModal('caseModal')">
+          <h3 id="digitalAccountModalTitle">
+            <i class="fas fa-gamepad"></i> Цифровой аккаунт
+          </h3>
+          <button class="modal-close" onclick="closeModal('digitalAccountModal')">
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <form id="caseForm" class="modal-body">
-          <div class="form-group">
-            <label><i class="fas fa-tag"></i> Тип дела</label
-            ><select id="caseType" required>
-              <option value="project">Проект</option>
-              <option value="task">Задача</option>
-              <option value="incident">Инцидент</option>
-              <option value="contract">Договор</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-heading"></i> Название</label
-            ><input
-              type="text"
-              id="caseTitle"
-              required
-              placeholder="Название дела"
-            />
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-align-left"></i> Описание</label
-            ><textarea
-              id="caseDescription"
-              rows="3"
-              placeholder="Описание..."
-            ></textarea>
-          </div>
+        <form id="digitalAccountForm" class="modal-body">
+          <input type="hidden" id="digitalAccountId" value="">
+          
           <div class="form-row">
             <div class="form-group">
-              <label><i class="fas fa-flag"></i> Приоритет</label
-              ><select id="casePriority">
-                <option value="low">Низкий</option>
-                <option value="medium" selected>Средний</option>
-                <option value="high">Высокий</option>
-                <option value="critical">Критический</option>
+              <label><i class="fab fa-steam"></i> Платформа</label>
+              <select id="accountPlatformType" required>
+                <option value="">Выберите платформу...</option>
+                <option value="steam">🎮 Steam</option>
+                <option value="discord">💬 Discord</option>
+                <option value="epic">🎮 Epic Games</option>
+                <option value="genshin">🌟 Genshin Impact</option>
+                <option value="ea">⚽ EA (Origin)</option>
+                <option value="blizzard">🔥 Blizzard (Battle.net)</option>
+                <option value="riot">⚔️ Riot Games</option>
+                <option value="microsoft">💎 Microsoft/Xbox</option>
+                <option value="sony">🎮 Sony/PlayStation</option>
+                <option value="nintendo">🍄 Nintendo</option>
+                <option value="ubisoft">🦅 Ubisoft</option>
+                <option value="rockstar">⭐ Rockstar</option>
+                <option value="mobile">📱 Мобильная игра</option>
+                <option value="other">🔧 Другое</option>
               </select>
             </div>
             <div class="form-group">
-              <label><i class="fas fa-calendar"></i> Срок</label
-              ><input type="date" id="caseDueDate" />
+              <label><i class="fas fa-tag"></i> Название аккаунта</label>
+              <input type="text" id="accountPlatformName" placeholder="Мой основной аккаунт">
             </div>
           </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="closeModal('caseModal')"
-            >
-              Отмена</button
-            ><button type="submit" class="btn-primary">Добавить</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Medical Record Modal -->
-    <div id="medicalModal" class="modal">
-      <div class="modal-overlay" onclick="closeModal('medicalModal')"></div>
-      <div class="modal-container modal-sm">
-        <div class="modal-header">
-          <h3><i class="fas fa-notes-medical"></i> Медицинская запись</h3>
-          <button class="modal-close" onclick="closeModal('medicalModal')">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <form id="medicalForm" class="modal-body">
-          <div class="form-group">
-            <label><i class="fas fa-file-medical"></i> Тип записи</label
-            ><select id="medicalType" required>
-              <option value="analysis">Анализ</option>
-              <option value="diagnosis">Диагноз</option>
-              <option value="vaccination">Прививка</option>
-              <option value="examination">Осмотр</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-heading"></i> Название</label
-            ><input
-              type="text"
-              id="medicalTitle"
-              required
-              placeholder="Название"
-            />
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-align-left"></i> Описание</label
-            ><textarea
-              id="medicalDescription"
-              rows="3"
-              placeholder="Описание..."
-            ></textarea>
-          </div>
+          
           <div class="form-row">
             <div class="form-group">
-              <label><i class="fas fa-calendar"></i> Дата</label
-              ><input type="date" id="medicalDate" />
+              <label><i class="fas fa-user"></i> Логин/Username</label>
+              <input type="text" id="accountUsername" placeholder="username">
             </div>
             <div class="form-group">
-              <label><i class="fas fa-user-md"></i> Врач</label
-              ><input type="text" id="medicalDoctor" placeholder="ФИО врача" />
+              <label><i class="fas fa-envelope"></i> Email</label>
+              <input type="email" id="accountEmail" placeholder="email@example.com">
             </div>
           </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-phone"></i> Телефон</label>
+              <input type="tel" id="accountPhone" placeholder="+7 XXX XXX-XX-XX">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-key"></i> Пароль</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="password" id="accountPassword" placeholder="Пароль" style="flex:1">
+                <button type="button" class="btn-secondary" onclick="togglePasswordVisibility('accountPassword')">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label><i class="fas fa-ticket-alt"></i> Резервные коды</label>
+            <textarea id="accountBackupCodes" rows="2" placeholder="Резервные коды (по одному на строку)"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label><i class="fas fa-question-circle"></i> Секретные вопросы</label>
+            <textarea id="accountSecurityQuestions" rows="2" placeholder="Вопрос: ответ"></textarea>
+          </div>
+          
+          <!-- Игровые ID и идентификаторы -->
+          <div class="form-section">
+            <h4><i class="fas fa-id-card"></i> Игровые ID и идентификаторы</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-id-badge"></i> Account ID</label>
+                <input type="text" id="accountAccountId" placeholder="ID аккаунта (Genshin Impact, Mobile Legends)">
+                <small>ID для добавления в друзья, донатов</small>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-qrcode"></i> UID</label>
+                <input type="text" id="accountUid" placeholder="Universal ID">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-user-circle"></i> User ID</label>
+                <input type="text" id="accountUserId" placeholder="User ID">
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-user-plus"></i> Friend Code</label>
+                <input type="text" id="accountFriendCode" placeholder="Код для добавления в друзья">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label><i class="fas fa-server"></i> Server ID</label>
+                <input type="text" id="accountServerId" placeholder="ID сервера (Mobile Legends)">
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-globe"></i> Server Name</label>
+                <input type="text" id="accountServerName" placeholder="Название сервера">
+              </div>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-map-marker-alt"></i> Регион</label>
+              <select id="accountRegion">
+                <option value="">Выберите регион...</option>
+                <option value="EU">🌍 Европа (EU)</option>
+                <option value="NA">🌎 Северная Америка (NA)</option>
+                <option value="ASIA">🌏 Азия (ASIA)</option>
+                <option value="RU">🇷🇺 Россия (RU)</option>
+                <option value="SEA">🌏 Юго-Восточная Азия (SEA)</option>
+                <option value="KR">🇰🇷 Корея (KR)</option>
+                <option value="JP">🇯🇵 Япония (JP)</option>
+                <option value="CN">🇨🇳 Китай (CN)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-gamepad"></i> Игровой ник</label>
+              <input type="text" id="accountNickname" placeholder="Nickname">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-server"></i> Сервер/Регион (устаревшее)</label>
+              <input type="text" id="accountServer" placeholder="EU, NA, ASIA, RU">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-chart-line"></i> Уровень</label>
+              <input type="number" id="accountLevel" placeholder="Уровень">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-medal"></i> Ранг</label>
+              <input type="text" id="accountRank" placeholder="Ранг/Звание">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label><i class="fas fa-users"></i> Гильдия/Клан</label>
+            <input type="text" id="accountGuild" placeholder="Название гильдии">
+          </div>
+          
+          <div class="form-group">
+            <label><i class="fas fa-user-friends"></i> Персонажи</label>
+            <textarea id="accountCharacters" rows="2" placeholder="Список персонажей (через запятую)"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label><i class="fas fa-sticky-note"></i> Заметки</label>
+            <textarea id="accountNotes" rows="2" placeholder="Дополнительная информация..."></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label><i class="fas fa-power-off"></i> Статус</label>
+            <select id="accountIsActive">
+              <option value="true">🟢 Активен</option>
+              <option value="false">🔴 Неактивен</option>
+            </select>
+          </div>
+          
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="closeModal('medicalModal')"
-            >
-              Отмена</button
-            ><button type="submit" class="btn-primary">Сохранить</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('digitalAccountModal')">Отмена</button>
+            <button type="submit" class="btn-primary">Сохранить</button>
           </div>
         </form>
       </div>
@@ -769,6 +825,28 @@
           <button class="btn-secondary" onclick="closeModal('confirmModal')">
             Отмена</button
           ><button id="confirmActionBtn" class="btn-danger">Удалить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="modal">
+      <div class="modal-overlay" onclick="closeModal('alertModal')"></div>
+      <div class="modal-container modal-xs">
+        <div class="modal-header">
+          <h3 id="alertTitle"><i class="fas fa-info-circle"></i> Уведомление</h3>
+          <button class="modal-close" onclick="closeModal('alertModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body text-center">
+          <div class="alert-icon" id="alertIcon">
+            <i class="fas fa-bell"></i>
+          </div>
+          <p id="alertMessage">Сообщение</p>
+        </div>
+        <div class="modal-footer justify-center">
+          <button class="btn-primary" onclick="closeModal('alertModal')">OK</button>
         </div>
       </div>
     </div>

@@ -26,7 +26,54 @@ class TagPreferenceResponse(TagPreferenceBase):
         from_attributes = True
 
 # ============================================
-# Person Schema с ИСПРАВЛЕННОЙ валидацией
+# Digital Account Schemas (ДО PersonResponse)
+# ============================================
+
+class DigitalAccountBase(BaseModel):
+    platform_type: str
+    platform_name: str
+    username: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    password: Optional[str] = None
+    backup_codes: Optional[str] = None
+    security_questions: Optional[str] = None
+    
+    # Игровые ID и идентификаторы
+    account_id: Optional[str] = None
+    uid: Optional[str] = None
+    user_id: Optional[str] = None
+    friend_code: Optional[str] = None
+    server_id: Optional[str] = None
+    server_name: Optional[str] = None
+    region: Optional[str] = None
+    
+    # Игровые данные
+    nickname: Optional[str] = None
+    server: Optional[str] = None
+    level: Optional[int] = None
+    rank: Optional[str] = None
+    guild: Optional[str] = None
+    characters: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = True
+
+class DigitalAccountCreate(DigitalAccountBase):
+    pass
+
+class DigitalAccountUpdate(DigitalAccountBase):
+    pass
+
+class DigitalAccountResponse(DigitalAccountBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# ============================================
+# Person Schema
 # ============================================
 
 class PersonBase(BaseModel):
@@ -72,14 +119,9 @@ class PersonBase(BaseModel):
     importance_level: Optional[str] = "medium"
     notes: Optional[str] = None
 
-    # ========================================
-    # ВАЛИДАТОРЫ ДЛЯ ПУСТЫХ СТРОК
-    # ========================================
-
     @field_validator('children_count', mode='before')
     @classmethod
     def validate_children_count(cls, v):
-        """Превращает пустую строку или None в 0"""
         if v is None or v == '':
             return 0
         try:
@@ -90,7 +132,6 @@ class PersonBase(BaseModel):
     @field_validator('height', 'weight', 'shoe_size', 'chest_size', 'waist_size', 'hip_size', 'heart_rate', mode='before')
     @classmethod
     def validate_numeric_fields(cls, v):
-        """Превращает пустые строки в None для опциональных числовых полей"""
         if v is None or v == '':
             return None
         try:
@@ -101,7 +142,6 @@ class PersonBase(BaseModel):
     @field_validator('importance', mode='before')
     @classmethod
     def validate_importance(cls, v):
-        """Превращает пустые строки в 0.0"""
         if v is None or v == '':
             return 0.0
         try:
@@ -109,25 +149,16 @@ class PersonBase(BaseModel):
         except (ValueError, TypeError):
             return 0.0
 
-    # ========================================
-    # ВАЛИДАТОРЫ ДЛЯ ДАТ (НОВЫЙ)
-    # ========================================
     @field_validator('birth_date', mode='before')
     @classmethod
     def validate_birth_date(cls, v):
-        """Превращает пустую строку в None"""
         if v is None or v == '':
             return None
         return v
 
-    # ========================================
-    # ОСНОВНЫЕ ВАЛИДАТОРЫ
-    # ========================================
-
     @field_validator('full_name')
     @classmethod
     def validate_full_name(cls, v):
-        """Проверяет, что имя не пустое и имеет разумную длину"""
         if not v or not v.strip():
             raise ValueError('Полное имя не может быть пустым')
         if len(v) > 255:
@@ -137,15 +168,10 @@ class PersonBase(BaseModel):
     @field_validator('short_name')
     @classmethod
     def validate_short_name(cls, v):
-        """
-        Проверяет короткое имя.
-        РАЗРЕШАЕТ кириллицу, латиницу, цифры, подчеркивание и дефис.
-        """
         if not v or not v.strip():
             raise ValueError('Короткое имя не может быть пустым')
         if len(v) > 100:
             raise ValueError('Короткое имя не может превышать 100 символов')
-        # ИСПРАВЛЕННОЕ РЕГУЛЯРНОЕ ВЫРАЖЕНИЕ: разрешает кириллицу, латиницу, цифры, _ и -
         if not re.match(r'^[a-zA-Zа-яА-Я0-9_-]+$', v):
             raise ValueError('Короткое имя может содержать только буквы (русские или английские), цифры, дефис и подчеркивание')
         return v.strip()
@@ -153,10 +179,8 @@ class PersonBase(BaseModel):
     @field_validator('phone')
     @classmethod
     def validate_phone(cls, v):
-        """Проверяет формат телефона (опционально)"""
         if v is None or v == '':
             return None
-        # Удаляем все пробелы и тире для проверки
         cleaned = re.sub(r'[\s\-\(\)]', '', v)
         if not re.match(r'^\+?[0-9]{10,15}$', cleaned):
             raise ValueError('Неверный формат телефона')
@@ -165,90 +189,21 @@ class PersonBase(BaseModel):
     @field_validator('email')
     @classmethod
     def validate_email(cls, v):
-        """Проверяет формат email (опционально)"""
         if v is None or v == '':
             return None
         if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', v):
             raise ValueError('Неверный формат email')
         return v.lower()
 
-    @field_validator('blood_type')
-    @classmethod
-    def validate_blood_type(cls, v):
-        """Проверяет группу крови"""
-        if v is None or v == '':
-            return None
-        valid_types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-        if v not in valid_types:
-            raise ValueError(f'Группа крови должна быть одной из: {", ".join(valid_types)}')
-        return v
-
-    @field_validator('rh_factor')
-    @classmethod
-    def validate_rh_factor(cls, v):
-        """Проверяет резус-фактор"""
-        if v is None or v == '':
-            return None
-        valid_factors = ['positive', 'negative']
-        if v not in valid_factors:
-            raise ValueError('Резус-фактор должен быть "positive" или "negative"')
-        return v
-
     @field_validator('gender')
     @classmethod
     def validate_gender(cls, v):
-        """Проверяет пол"""
         if v is None or v == '':
             return None
         valid_genders = ['male', 'female', 'other']
         if v not in valid_genders:
             raise ValueError('Пол должен быть "male", "female" или "other"')
         return v
-
-    @field_validator('marital_status')
-    @classmethod
-    def validate_marital_status(cls, v):
-        """Проверяет семейное положение"""
-        if v is None or v == '':
-            return None
-        valid_statuses = ['single', 'married', 'divorced', 'widowed']
-        if v not in valid_statuses:
-            raise ValueError('Семейное положение должно быть: single, married, divorced, widowed')
-        return v
-
-    @field_validator('importance_level')
-    @classmethod
-    def validate_importance_level(cls, v):
-        """Проверяет уровень важности"""
-        if v is None or v == '':
-            return 'medium'
-        valid_levels = ['low', 'medium', 'high', 'critical']
-        if v not in valid_levels:
-            raise ValueError('Уровень важности должен быть: low, medium, high, critical')
-        return v
-
-    @field_validator('height', 'weight', 'shoe_size', 'chest_size', 'waist_size', 'hip_size', 'heart_rate')
-    @classmethod
-    def validate_positive_numbers(cls, v):
-        """Проверяет, что числа положительные"""
-        if v is None:
-            return None
-        if v < 0:
-            raise ValueError('Значение не может быть отрицательным')
-        if v > 500:
-            raise ValueError('Значение слишком большое')
-        return v
-
-    @field_validator('birth_date')
-    @classmethod
-    def validate_birth_date_not_future(cls, v):
-        """Проверяет, что дата рождения не в будущем (вызывается ТОЛЬКО если v не None)"""
-        if v is None:
-            return None
-        if v > date.today():
-            raise ValueError('Дата рождения не может быть в будущем')
-        return v
-
 
 class PersonCreate(PersonBase):
     pass
@@ -262,6 +217,7 @@ class PersonResponse(PersonBase):
     updated_at: Optional[datetime] = None
     social_media: List[SocialMediaResponse] = []
     tags_prefs: List[TagPreferenceResponse] = []
+    digital_accounts: List[DigitalAccountResponse] = []  # Теперь DigitalAccountResponse определён
     
     class Config:
         from_attributes = True

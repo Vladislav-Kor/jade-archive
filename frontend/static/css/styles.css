@@ -207,6 +207,17 @@ body {
     padding: 5px;
 }
 
+.fa-genshin::before {
+    content: ""; /* Убираем стандартный символ звезды */
+    display: inline-block;
+    width: 1em;   /* Размер подстраивается под текст */
+    height: 1em;
+    background-image: url('../ico/genshin-icon.svg'); /* Путь к вашему файлу */
+    background-size: contain;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
 .sort-btn {
     border: 1px solid #092d25;
     border-radius: 8px;

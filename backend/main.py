@@ -52,6 +52,7 @@ def list_persons(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
     for person in persons:
         person.social_media = crud.get_social_media(db, person.id)
         person.tags_prefs = crud.get_tags(db, person.id)
+        person.digital_accounts = crud.get_digital_accounts(db, person.id)
     return persons
 
 @app.get("/api/persons/{person_id}", response_model=schemas.PersonResponse)
@@ -61,6 +62,7 @@ def get_person(person_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Person not found")
     person.social_media = crud.get_social_media(db, person_id)
     person.tags_prefs = crud.get_tags(db, person_id)
+    person.digital_accounts = crud.get_digital_accounts(db, person_id)
     return person
 
 @app.put("/api/persons/{person_id}", response_model=schemas.PersonResponse)
@@ -70,6 +72,7 @@ def update_person(person_id: int, person: schemas.PersonUpdate, db: Session = De
         raise HTTPException(status_code=404, detail="Person not found")
     updated.social_media = crud.get_social_media(db, person_id)
     updated.tags_prefs = crud.get_tags(db, person_id)
+    updated.digital_accounts = crud.get_digital_accounts(db, person_id)
     return updated
 
 @app.delete("/api/persons/{person_id}")
@@ -84,6 +87,7 @@ def search_persons(q: str, db: Session = Depends(get_db)):
     for person in persons:
         person.social_media = crud.get_social_media(db, person.id)
         person.tags_prefs = crud.get_tags(db, person.id)
+        person.digital_accounts = crud.get_digital_accounts(db, person.id)
     return persons
 
 # ============================================
@@ -118,7 +122,7 @@ def get_tree(db: Session = Depends(get_db)):
     return tree
 
 # ============================================
-# Relation Endpoints (ИСПРАВЛЕНЫ)
+# Relation Endpoints
 # ============================================
 
 @app.get("/api/relations", response_model=List[schemas.RelationResponse])
@@ -127,7 +131,6 @@ def get_relations(db: Session = Depends(get_db)):
 
 @app.get("/api/persons/{person_id}/relations")
 def get_person_relations(person_id: int, db: Session = Depends(get_db)):
-    """Получить все связи для конкретного человека"""
     person = crud.get_person(db, person_id)
     if not person:
         raise HTTPException(status_code=404, detail="Person not found")
@@ -160,7 +163,6 @@ def get_person_relations(person_id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/relations", response_model=schemas.RelationResponse)
 def create_relation(relation: schemas.RelationCreate, db: Session = Depends(get_db)):
-    # Проверяем, существуют ли оба человека
     parent = crud.get_person(db, relation.parent_id)
     child = crud.get_person(db, relation.child_id)
     
@@ -169,11 +171,9 @@ def create_relation(relation: schemas.RelationCreate, db: Session = Depends(get_
     if not child:
         raise HTTPException(status_code=404, detail=f"Child person with id {relation.child_id} not found")
     
-    # Проверяем, не пытается ли пользователь создать связь с самим собой
     if relation.parent_id == relation.child_id:
         raise HTTPException(status_code=400, detail="Cannot create relation with self")
     
-    # Проверяем, существует ли уже такая связь
     existing = db.query(models.Relation).filter(
         models.Relation.parent_id == relation.parent_id,
         models.Relation.child_id == relation.child_id
@@ -185,7 +185,6 @@ def create_relation(relation: schemas.RelationCreate, db: Session = Depends(get_
             detail=f"Relation already exists: {parent.full_name} -> {child.full_name} ({existing.relation_type})"
         )
     
-    # Проверяем, не существует ли обратная связь
     reverse_existing = db.query(models.Relation).filter(
         models.Relation.parent_id == relation.child_id,
         models.Relation.child_id == relation.parent_id
@@ -238,6 +237,53 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     return {"message": "Tag deleted"}
 
 # ============================================
+# Digital Accounts Endpoints
+# ============================================
+
+@app.get("/api/persons/{person_id}/digital-accounts", response_model=List[schemas.DigitalAccountResponse])
+def get_person_digital_accounts(person_id: int, db: Session = Depends(get_db)):
+    person = crud.get_person(db, person_id)
+    if not person:
+        raise HTTPException(status_code=404, detail="Person not found")
+    return crud.get_digital_accounts(db, person_id)
+
+@app.get("/api/digital-accounts/{account_id}", response_model=schemas.DigitalAccountResponse)
+def get_digital_account(account_id: int, db: Session = Depends(get_db)):
+    """Получить цифровой аккаунт по ID для редактирования"""
+    account = crud.get_digital_account(db, account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Digital account not found")
+    return account
+
+@app.post("/api/persons/{person_id}/digital-accounts", response_model=schemas.DigitalAccountResponse)
+def create_digital_account(
+    person_id: int, 
+    account: schemas.DigitalAccountCreate, 
+    db: Session = Depends(get_db)
+):
+    person = crud.get_person(db, person_id)
+    if not person:
+        raise HTTPException(status_code=404, detail="Person not found")
+    return crud.create_digital_account(db, person_id, account)
+
+@app.put("/api/digital-accounts/{account_id}", response_model=schemas.DigitalAccountResponse)
+def update_digital_account(
+    account_id: int, 
+    account: schemas.DigitalAccountUpdate, 
+    db: Session = Depends(get_db)
+):
+    updated = crud.update_digital_account(db, account_id, account)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Digital account not found")
+    return updated
+
+@app.delete("/api/digital-accounts/{account_id}")
+def delete_digital_account(account_id: int, db: Session = Depends(get_db)):
+    if not crud.delete_digital_account(db, account_id):
+        raise HTTPException(status_code=404, detail="Digital account not found")
+    return {"message": "Digital account deleted"}
+
+# ============================================
 # Startup Event - Create Sample Data
 # ============================================
 
@@ -250,7 +296,6 @@ def startup_event():
         if len(persons) == 0:
             print("Creating sample data...")
             
-            # Create root
             me = crud.create_person(db, schemas.PersonCreate(
                 full_name="Моя учетная запись",
                 short_name="me",
@@ -259,7 +304,6 @@ def startup_event():
                 notes="Корневой пользователь"
             ))
             
-            # Create sample persons
             john = crud.create_person(db, schemas.PersonCreate(
                 full_name="Иван Петров",
                 short_name="ivan",
@@ -286,7 +330,6 @@ def startup_event():
                 notes="Коллега, отличный дизайнер"
             ))
             
-            # Create relations
             crud.create_relation(db, schemas.RelationCreate(
                 parent_id=me.id, child_id=john.id, relation_type="Друг"
             ))
@@ -294,7 +337,6 @@ def startup_event():
                 parent_id=me.id, child_id=maria.id, relation_type="Коллега"
             ))
             
-            # Add tags
             crud.add_tag(db, john.id, schemas.TagPreferenceBase(
                 category="Favorite Color", value="Синий"
             ))
@@ -302,7 +344,6 @@ def startup_event():
                 category="Hobby", value="Шахматы"
             ))
             
-            # Add social media
             crud.add_social_media(db, john.id, schemas.SocialMediaBase(
                 platform="Telegram", link="https://t.me/ivan"
             ))

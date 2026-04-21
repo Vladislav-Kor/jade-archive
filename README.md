@@ -42,7 +42,6 @@ _Сформировано в рамках архитектуры Jade Archive. �
 8. [Telegram Бот](#telegram-бот)
 9. [База данных](#база-данных)
 10. [Устранение проблем](#устранение-проблем)
-11. [Дорожная карта](#дорожная-карта)
 
 ---
 
@@ -309,6 +308,34 @@ ports:
 | `/cancel` | Отмена текущего действия | `/cancel` |
 
 ---
+
+## База данных
+
+### Создание резервной копии PostgreSQL
+
+### Через docker exec (рекомендуется)
+
+### Создать директорию для бэкапов
+
+ mkdir ...\jade-archive\backups
+
+## Создать дамп базы данных
+
+ docker exec jade_db pg_dump -U jade_user jade_archive > ...\jade-archive\backups\jade_archive_backup_$(Get-Date -Format "yyyy-MM-dd_HH-mm").sql
+
+## Или с понятным именем
+
+ docker exec jade_db pg_dump -U jade_user jade_archive > backups\jade_archive_backup_latest.sql
+
+### Восстановить базу данных
+
+ docker exec -i jade_db psql -U jade_user jade_archive < backups\jade_archive_backup_latest.sql
+
+### Или с принудительным удалением существующей БД
+
+ docker exec -i jade_db psql -U jade_user -c "DROP DATABASE jade_archive;"
+ docker exec -i jade_db psql -U jade_user -c "CREATE DATABASE jade_archive;"
+ docker exec -i jade_db psql -U jade_user jade_archive < backups\jade_archive_backup_latest.sql
 
 ## Устранение проблем
 

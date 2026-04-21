@@ -8,6 +8,7 @@ let confirmCallback = null;
 let expandedFolders = new Set();
 let currentSortMode = 'importance';
 let currentHierarchyView = false;
+let currentDigitalAccountId = null;
 // let currentCasePersonId = null;
 // let currentMedicalPersonId = null;
 
@@ -169,8 +170,269 @@ function formatDate(date) {
     return new Date(date).toLocaleDateString('ru-RU');
 }
 
+// ========================================
+// DIGITAL ACCOUNTS FUNCTIONS
+// ========================================
+
+function getPlatformIcon(platform) {
+    const icons = {
+        steam: 'steam',
+        discord: 'discord',
+        epic: 'fort-awesome',
+        genshin: 'genshin',
+        ea: 'futbol',
+        blizzard: 'snowflake',
+        riot: 'bolt',
+        microsoft: 'windows',
+        sony: 'playstation',
+        nintendo: 'nintendo-switch',
+        ubisoft: 'ubi',
+        rockstar: 'star',
+        mobile: 'android',
+        other: 'gamepad'
+    };
+    return icons[platform] || 'gamepad';
+}
+
+function getPlatformName(platform) {
+    const names = {
+        steam: 'Steam',
+        discord: 'Discord',
+        epic: 'Epic Games',
+        genshin: 'Genshin Impact',
+        ea: 'EA / Origin',
+        blizzard: 'Blizzard (Battle.net)',
+        riot: 'Riot Games',
+        microsoft: 'Microsoft / Xbox',
+        sony: 'Sony / PlayStation',
+        nintendo: 'Nintendo',
+        ubisoft: 'Ubisoft',
+        rockstar: 'Rockstar',
+        mobile: 'Мобильная игра',
+        other: 'Другое'
+    };
+    return names[platform] || platform;
+}
+
+function openDigitalAccountModal(accountId = null) {
+    currentDigitalAccountId = accountId;
+    const form = document.getElementById('digitalAccountForm');
+    const title = document.getElementById('digitalAccountModalTitle');
+    
+    if (form) form.reset();
+    
+    if (accountId) {
+        if (title) title.innerHTML = '<i class="fas fa-edit"></i> Редактирование аккаунта';
+        loadDigitalAccountForEdit(accountId);
+    } else {
+        if (title) title.innerHTML = '<i class="fas fa-gamepad"></i> Новый цифровой аккаунт';
+        document.getElementById('digitalAccountId').value = '';
+    }
+    
+    openModal('digitalAccountModal');
+}
+
+async function loadDigitalAccountForEdit(accountId) {
+    try {
+        const account = await fetchAPI(`/digital-accounts/${accountId}`);
+        
+        document.getElementById('digitalAccountId').value = account.id;
+        document.getElementById('accountPlatformType').value = account.platform_type || '';
+        document.getElementById('accountPlatformName').value = account.platform_name || '';
+        document.getElementById('accountUsername').value = account.username || '';
+        document.getElementById('accountEmail').value = account.email || '';
+        document.getElementById('accountPhone').value = account.phone || '';
+        document.getElementById('accountPassword').value = account.password || '';
+        document.getElementById('accountBackupCodes').value = account.backup_codes || '';
+        document.getElementById('accountSecurityQuestions').value = account.security_questions || '';
+        
+        // Новые поля для ID
+        document.getElementById('accountAccountId').value = account.account_id || '';
+        document.getElementById('accountUid').value = account.uid || '';
+        document.getElementById('accountUserId').value = account.user_id || '';
+        document.getElementById('accountFriendCode').value = account.friend_code || '';
+        document.getElementById('accountServerId').value = account.server_id || '';
+        document.getElementById('accountServerName').value = account.server_name || '';
+        document.getElementById('accountRegion').value = account.region || '';
+        
+        document.getElementById('accountNickname').value = account.nickname || '';
+        document.getElementById('accountServer').value = account.server || '';
+        document.getElementById('accountLevel').value = account.level || '';
+        document.getElementById('accountRank').value = account.rank || '';
+        document.getElementById('accountGuild').value = account.guild || '';
+        document.getElementById('accountCharacters').value = account.characters || '';
+        document.getElementById('accountNotes').value = account.notes || '';
+        document.getElementById('accountIsActive').value = account.is_active ? 'true' : 'false';
+        
+    } catch (error) {
+        showToast('Ошибка загрузки аккаунта', 'error');
+    }
+}
+
+async function saveDigitalAccount() {
+    const accountData = {
+        platform_type: document.getElementById('accountPlatformType').value,
+        platform_name: document.getElementById('accountPlatformName').value,
+        username: document.getElementById('accountUsername').value,
+        email: document.getElementById('accountEmail').value,
+        phone: document.getElementById('accountPhone').value,
+        password: document.getElementById('accountPassword').value,
+        backup_codes: document.getElementById('accountBackupCodes').value,
+        security_questions: document.getElementById('accountSecurityQuestions').value,
+        
+        // Новые поля для ID
+        account_id: document.getElementById('accountAccountId').value,
+        uid: document.getElementById('accountUid').value,
+        user_id: document.getElementById('accountUserId').value,
+        friend_code: document.getElementById('accountFriendCode').value,
+        server_id: document.getElementById('accountServerId').value,
+        server_name: document.getElementById('accountServerName').value,
+        region: document.getElementById('accountRegion').value,
+        
+        nickname: document.getElementById('accountNickname').value,
+        server: document.getElementById('accountServer').value,
+        level: parseInt(document.getElementById('accountLevel').value) || null,
+        rank: document.getElementById('accountRank').value,
+        guild: document.getElementById('accountGuild').value,
+        characters: document.getElementById('accountCharacters').value,
+        notes: document.getElementById('accountNotes').value,
+        is_active: document.getElementById('accountIsActive').value === 'true'
+    };
+    
+    // Валидация
+    if (!accountData.platform_type) {
+        showToast('Выберите платформу', 'error');
+        return;
+    }
+    if (!accountData.platform_name) {
+        accountData.platform_name = accountData.platform_type;
+    }
+    
+    try {
+        let url, method;
+        
+        if (currentDigitalAccountId) {
+            url = `${API}/digital-accounts/${currentDigitalAccountId}`;
+            method = 'PUT';
+        } else {
+            url = `${API}/persons/${currentPersonId}/digital-accounts`;
+            method = 'POST';
+        }
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(accountData)
+        });
+        
+        if (!response.ok) throw new Error(await response.text());
+        
+        closeModal('digitalAccountModal');
+        await loadPerson(currentPersonId);
+        showToast(currentDigitalAccountId ? 'Аккаунт обновлен' : 'Аккаунт добавлен', 'success');
+        
+    } catch (error) {
+        showToast('Ошибка при сохранении: ' + error.message, 'error');
+    }
+}
+
+async function deleteDigitalAccount(accountId) {
+    showConfirm('Удалить этот аккаунт?', async () => {
+        try {
+            const response = await fetch(`${API}/digital-accounts/${accountId}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) throw new Error(await response.text());
+            
+            await loadPerson(currentPersonId);
+            showToast('Аккаунт удален', 'success');
+            closeModal('confirmModal');
+            
+        } catch (error) {
+            showToast('Ошибка при удалении', 'error');
+        }
+    });
+}
+
+function togglePasswordVisibility(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    const type = field.type === 'password' ? 'text' : 'password';
+    field.type = type;
+    
+    const button = field.nextElementSibling;
+    if (button) {
+        const icon = button.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+    }
+}
+
+// ========================================
+// DISPLAY PERSON WITH DIGITAL ACCOUNTS
+// ========================================
+
 function displayPerson(p) {
     const age = p.birth_date ? new Date().getFullYear() - new Date(p.birth_date).getFullYear() : null;
+    
+    // Digital Accounts HTML
+    const digitalAccountsHtml = p.digital_accounts?.length ? 
+        p.digital_accounts.map(acc => `
+            <div class="digital-account-item p-3 rounded-xl mb-2" style="background: rgba(0, 59, 49, 0.3); border: 1px solid rgba(0, 168, 132, 0.15);">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2 flex-wrap">
+                            <i class="fab fa-${getPlatformIcon(acc.platform_type)} text-xl text-[#00a884]"></i>
+                            <strong class="text-[#00a884]">${escapeHtml(acc.platform_name || getPlatformName(acc.platform_type))}</strong>
+                            ${acc.is_active ? '<span class="badge" style="background: rgba(0,168,132,0.2); color: #00a884;">Активен</span>' : '<span class="badge" style="background: rgba(255,107,107,0.2); color: #ff6b6b;">Неактивен</span>'}
+                        </div>
+                        ${acc.username ? `<div class="text-sm"><i class="fas fa-user w-5 text-[#00a884]"></i> ${escapeHtml(acc.username)}</div>` : ''}
+                        ${acc.email ? `<div class="text-sm"><i class="fas fa-envelope w-5 text-[#00a884]"></i> ${escapeHtml(acc.email)}</div>` : ''}
+                        ${acc.account_id ? `<div class="text-sm"><i class="fas fa-id-badge w-5 text-[#00a884]"></i> Account ID: <code class="bg-[#001a15] px-2 py-1 rounded">${escapeHtml(acc.account_id)}</code></div>` : ''}
+                        ${acc.uid ? `<div class="text-sm"><i class="fas fa-qrcode w-5 text-[#00a884]"></i> UID: <code class="bg-[#001a15] px-2 py-1 rounded">${escapeHtml(acc.uid)}</code></div>` : ''}
+                        ${acc.user_id ? `<div class="text-sm"><i class="fas fa-user-circle w-5 text-[#00a884]"></i> User ID: ${escapeHtml(acc.user_id)}</div>` : ''}
+                        ${acc.friend_code ? `<div class="text-sm"><i class="fas fa-user-plus w-5 text-[#00a884]"></i> Friend Code: <code class="bg-[#001a15] px-2 py-1 rounded">${escapeHtml(acc.friend_code)}</code></div>` : ''}
+                        ${acc.server_id ? `<div class="text-sm"><i class="fas fa-server w-5 text-[#00a884]"></i> Server ID: ${escapeHtml(acc.server_id)}</div>` : ''}
+                        ${acc.server_name ? `<div class="text-sm"><i class="fas fa-globe w-5 text-[#00a884]"></i> Server: ${escapeHtml(acc.server_name)}</div>` : ''}
+                        ${acc.region ? `<div class="text-sm"><i class="fas fa-map-marker-alt w-5 text-[#00a884]"></i> Регион: ${escapeHtml(acc.region)}</div>` : ''}
+                        ${acc.nickname ? `<div class="text-sm"><i class="fas fa-gamepad w-5 text-[#00a884]"></i> Ник: ${escapeHtml(acc.nickname)}</div>` : ''}
+                        ${acc.level ? `<div class="text-sm"><i class="fas fa-chart-line w-5 text-[#00a884]"></i> Уровень: ${acc.level}</div>` : ''}
+                        ${acc.rank ? `<div class="text-sm"><i class="fas fa-medal w-5 text-[#00a884]"></i> Ранг: ${escapeHtml(acc.rank)}</div>` : ''}
+                        ${acc.guild ? `<div class="text-sm"><i class="fas fa-users w-5 text-[#00a884]"></i> Гильдия: ${escapeHtml(acc.guild)}</div>` : ''}
+                        ${acc.server ? `<div class="text-sm"><i class="fas fa-server w-5 text-[#00a884]"></i> Сервер: ${escapeHtml(acc.server)}</div>` : ''}
+                        ${acc.characters ? `<div class="text-sm"><i class="fas fa-user-friends w-5 text-[#00a884]"></i> Персонажи: ${escapeHtml(acc.characters)}</div>` : ''}
+                        ${acc.notes ? `<div class="text-xs text-[#e0f2f1]/50 mt-1"><i class="fas fa-sticky-note"></i> ${escapeHtml(acc.notes)}</div>` : ''}
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="action-btn" onclick="openDigitalAccountModal(${acc.id})" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn text-red-400" onclick="deleteDigitalAccount(${acc.id})" title="Удалить">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                ${acc.password || acc.backup_codes || acc.security_questions || acc.characters ? `
+                <details class="mt-2">
+                    <summary class="text-xs text-[#e0f2f1]/40 cursor-pointer hover:text-[#00a884]">
+                        🔒 Показать чувствительные данные
+                    </summary>
+                    <div class="mt-2 space-y-1 text-sm border-t border-[#00a884]/20 pt-2">
+                        ${acc.password ? `<div><i class="fas fa-key text-[#00a884] w-5"></i> Пароль: <code class="bg-[#001a15] px-2 py-1 rounded text-xs">${escapeHtml(acc.password)}</code></div>` : ''}
+                        ${acc.backup_codes ? `<div><i class="fas fa-ticket-alt text-[#00a884] w-5"></i> Резервные коды:<br><code class="bg-[#001a15] px-2 py-1 rounded text-xs block mt-1 whitespace-pre-wrap">${escapeHtml(acc.backup_codes)}</code></div>` : ''}
+                        ${acc.security_questions ? `<div><i class="fas fa-question-circle text-[#00a884] w-5"></i> Секретные вопросы:<br><code class="bg-[#001a15] px-2 py-1 rounded text-xs block mt-1">${escapeHtml(acc.security_questions)}</code></div>` : ''}
+                        ${acc.characters ? `<div><i class="fas fa-user-friends text-[#00a884] w-5"></i> Персонажи:<br><code class="bg-[#001a15] px-2 py-1 rounded text-xs block mt-1">${escapeHtml(acc.characters)}</code></div>` : ''}
+                    </div>
+                </details>
+                ` : ''}
+            </div>
+        `).join('') : 
+        '<div class="text-center text-[#e0f2f1]/40 py-4"><i class="fas fa-gamepad mr-2"></i>Нет добавленных аккаунтов</div>';
+    
     document.getElementById('mainContent').innerHTML = `
     <div class="animate-in">
         <!-- Header -->
@@ -197,13 +459,27 @@ function displayPerson(p) {
         <!-- Социальные сети -->
         <div class="dossier-card"><h3><i class="fas fa-share-alt"></i> Социальные сети</h3>${p.social_media?.length ? p.social_media.map(sm => `<div class="social-item"><div><i class="fab fa-${sm.platform.toLowerCase()}"></i> <strong>${escapeHtml(sm.platform)}</strong></div><div><a href="${escapeHtml(sm.link)}" target="_blank" class="social-link">${escapeHtml(sm.link)}</a></div><button class="action-btn" onclick="deleteSocialMedia(${sm.id})"><i class="fas fa-trash"></i></button></div>`).join('') : '<div style="text-align:center; padding:20px">Нет добавленных соцсетей</div>'}<div style="margin-top:16px"><button class="btn-secondary" onclick="openSocialModal(${p.id})"><i class="fas fa-plus"></i> Добавить соцсеть</button></div></div>
         
-        <!-- Дела -->
-        <div class="dossier-card"><h3><i class="fas fa-briefcase"></i> Дела и проекты</h3>${p.cases?.length ? p.cases.map(c => `<div class="case-item"><div><i class="fas fa-${c.case_type === 'project' ? 'project-diagram' : (c.case_type === 'task' ? 'check-circle' : 'exclamation-triangle')}"></i> <strong>${escapeHtml(c.title)}</strong> <span class="badge priority-${c.priority}">${c.priority === 'critical' ? 'Критический' : (c.priority === 'high' ? 'Высокий' : (c.priority === 'medium' ? 'Средний' : 'Низкий'))}</span></div><div class="case-desc">${c.description || ''}</div><div class="case-meta"><i class="fas fa-calendar"></i> Срок: ${formatDate(c.due_date)} <i class="fas fa-flag-checkered"></i> Статус: ${c.status === 'active' ? 'Активно' : (c.status === 'completed' ? 'Завершено' : 'Ожидает')}</div></div>`).join('') : '<div style="text-align:center; padding:20px">Нет дел</div>'}<div style="margin-top:16px"><button class="btn-secondary" onclick="openCaseModal(${p.id})"><i class="fas fa-plus"></i> Добавить дело</button></div></div>
+        <!-- Цифровые аккаунты (игры, Discord, Steam и др.) -->
+        <div class="dossier-card">
+            <div class="flex justify-between items-center mb-4">
+                <h3><i class="fas fa-gamepad"></i> Цифровые аккаунты</h3>
+                <button class="btn-secondary text-sm" onclick="openDigitalAccountModal()">
+                    <i class="fas fa-plus"></i> Добавить аккаунт
+                </button>
+            </div>
+            <div id="digitalAccountsList" class="space-y-3">
+                ${digitalAccountsHtml}
+            </div>
+        </div>
         
         <!-- Заметки -->
         <div class="dossier-card"><h3><i class="fas fa-sticky-note"></i> Заметки</h3><p>${p.notes || 'Нет заметок'}</p></div>
     </div>`;
-    document.querySelectorAll('.tree-node').forEach(node => { node.classList.remove('selected'); if (node.querySelector(`[onclick="loadPerson(${p.id})"]`)) node.classList.add('selected'); });
+    
+    document.querySelectorAll('.tree-node').forEach(node => { 
+        node.classList.remove('selected'); 
+        if (node.querySelector(`[onclick="loadPerson(${p.id})"]`)) node.classList.add('selected'); 
+    });
 }
 
 // CRUD Operations
@@ -489,19 +765,6 @@ async function openPersonModal(personId = null) {
     openModal('personModal');
 }
 
-// Relation Modal
-async function openRelationModal(parentId) {
-    currentParentId = parentId;
-    const persons = await fetchAPI('/persons');
-    const otherPersons = persons.filter(p => p.id !== parentId);
-    if (otherPersons.length === 0) { showToast('Нет доступных контактов', 'error'); return; }
-    const select = document.getElementById('relationChildId');
-    select.innerHTML = '<option value="">-- Выберите контакт --</option>';
-    otherPersons.forEach(p => { const opt = document.createElement('option'); opt.value = p.id; opt.textContent = `${p.full_name} (@${p.short_name})`; select.appendChild(opt); });
-    document.getElementById('relationType').value = '';
-    openModal('relationModal');
-}
-
 // Social Modal
 let currentSocialPersonId = null;
 function openSocialModal(personId) { currentSocialPersonId = personId; openModal('socialModal'); }
@@ -514,6 +777,12 @@ document.getElementById('socialForm')?.addEventListener('submit', async (e) => {
     closeModal('socialModal');
     await loadPerson(currentSocialPersonId);
     showToast('Соцсеть добавлена', 'success');
+});
+
+// Digital Account Form Submit
+document.getElementById('digitalAccountForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await saveDigitalAccount();
 });
 
 // Case Modal
@@ -547,9 +816,13 @@ async function updateStats() {
         const relations = await fetchAPI('/relations');
         document.getElementById('totalCount').textContent = persons.length;
         document.getElementById('relationsCount').textContent = relations?.length || 0;
-        let casesCount = 0;
-        for (const p of persons.slice(0, 10)) { const full = await fetchAPI(`/persons/${p.id}`); casesCount += full.cases?.length || 0; }
-        document.getElementById('casesCount').textContent = casesCount;
+        
+        let accountsCount = 0;
+        for (const p of persons.slice(0, 10)) { 
+            const full = await fetchAPI(`/persons/${p.id}`); 
+            accountsCount += full.digital_accounts?.length || 0;
+        }
+        document.getElementById('accountsCount').textContent = accountsCount;
     } catch (e) { console.error(e); }
 }
 
