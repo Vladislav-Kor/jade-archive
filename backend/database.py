@@ -1,4 +1,4 @@
-﻿import os
+import os
 import time
 import logging
 from sqlalchemy import create_engine, text, inspect
@@ -12,7 +12,10 @@ pymysql.install_as_MySQLdb()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://jade_user:jade_password@db:3306/jade_archive?charset=utf8mb4")
+# Адрес базы — только из окружения (docker-compose.yml берёт пароль из .env), без пароля в коде.
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("Задайте DATABASE_URL (см. .env.example)")
 
 engine = create_engine(
     DATABASE_URL,

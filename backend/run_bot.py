@@ -9,11 +9,17 @@ import crud
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-BOT_TOKEN = "8671439867:AAELj__eiVFoie65jw3e2tQQkr_WJIawoDY"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # backend/.env или .env проекта; токен в коде не хранится
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise SystemExit("Задайте BOT_TOKEN в .env (см. .env.example)")
 
 # НАСТРОЙКА ПРОКСИ (выберите один вариант)
 # Вариант 1: SOCKS5 прокси (например, через Tor или VPN)
-PROXY_URL = "socks5://127.0.0.1:1080"  # Замените на ваш прокси
+PROXY_URL = os.getenv("PROXY_URL", "socks5://127.0.0.1:1080")
 
 # Вариант 2: HTTP прокси
 # PROXY_URL = "http://45.144.53.89:80"

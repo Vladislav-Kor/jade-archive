@@ -1,12 +1,12 @@
-﻿services:
+services:
   db:
     image: mysql:8
     container_name: jade_db
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: jade_archive
-      MYSQL_USER: jade_user
-      MYSQL_PASSWORD: jade_password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?задайте в .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-jade_archive}
+      MYSQL_USER: ${MYSQL_USER:-jade_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?задайте в .env}
       MYSQL_CHARSET: utf8mb4
       MYSQL_COLLATION: utf8mb4_unicode_ci
     volumes:
@@ -17,7 +17,8 @@
       - jade_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      # mysqladmin ping возвращает 0, если сервер запущен, даже без пароля
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -26,7 +27,7 @@
     build: ./backend
     container_name: jade_app
     environment:
-      DATABASE_URL: mysql+pymysql://jade_user:jade_password@db:3306/jade_archive?charset=utf8mb4
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER:-jade_user}:${MYSQL_PASSWORD:?задайте в .env}@db:3306/${MYSQL_DATABASE:-jade_archive}?charset=utf8mb4
     ports:
       - "8000:8000"
     networks:
@@ -42,8 +43,8 @@
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      PMA_USER: jade_user
-      PMA_PASSWORD: jade_password
+      PMA_USER: ${MYSQL_USER:-jade_user}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:?задайте в .env}
       UPLOAD_LIMIT: 300M
     ports:
       - "8081:80"
