@@ -55,7 +55,7 @@ def register_extension_routes(app: FastAPI):
             logger.error(f"Error getting categories: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to get categories: {str(e)}"
+                detail="Failed to get categories"  # подробности — только в журнале сервера
             )
     
     # /tree регистрируется раньше /{category_id}, иначе "tree" разбирается как id и даёт 422.
@@ -91,7 +91,7 @@ def register_extension_routes(app: FastAPI):
             logger.error(f"Error getting category tree: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to get category tree: {str(e)}"
+                detail="Failed to get category tree"  # подробности — только в журнале сервера
             )
     
     @app.get(
@@ -133,7 +133,7 @@ def register_extension_routes(app: FastAPI):
             logger.error(f"Error getting category {category_id}: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to get category: {str(e)}"
+                detail="Failed to get category"  # подробности — только в журнале сервера
             )
     
     @app.post(
@@ -192,7 +192,7 @@ def register_extension_routes(app: FastAPI):
             db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to create category: {str(e)}"
+                detail="Failed to create category"  # подробности — только в журнале сервера
             )
     
     @app.put(
@@ -259,7 +259,7 @@ def register_extension_routes(app: FastAPI):
             db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to update category: {str(e)}"
+                detail="Failed to update category"  # подробности — только в журнале сервера
             )
     
     @app.delete(
@@ -308,7 +308,7 @@ def register_extension_routes(app: FastAPI):
             db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to delete category: {str(e)}"
+                detail="Failed to delete category"  # подробности — только в журнале сервера
             )
     
     logger.info("Extension routes registered successfully")

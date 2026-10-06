@@ -530,7 +530,7 @@ def create_cross_record(record: schemas.CrossRecordCreate, db: Session = Depends
         return result
     except Exception as e:
         print(f"Error creating record: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to create record")  # подробности — в журнале
 
 @app.put("/api/cross-records/{record_id}", response_model=schemas.CrossRecordResponse)
 def update_cross_record(record_id: int, record: schemas.CrossRecordUpdate, db: Session = Depends(get_db)):
