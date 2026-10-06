@@ -1,27 +1,10 @@
-﻿import { apiClient } from '../client'
+import { apiClient } from '../client'
 
 export const personsApi = {
-    getAll: () => {
-        return apiClient.get('/persons')
-    },
-
-    getById: (id) => {
-        return apiClient.get('/persons/' + id)
-    },
-
-    create: (data) => {
-        return apiClient.post('/persons', data)
-    },
-
-    update: (id, data) => {
-        return apiClient.put('/persons/' + id, data)
-    },
-
-    delete: (id) => {
-        return apiClient.delete('/persons/' + id)
-    },
-
-    search: (query) => {
-        return apiClient.get('/search?q=' + query)
-    }
+    getAll: () => apiClient.get('/persons'),
+    getById: (id: number) => apiClient.get(`/persons/${id}`),
+    create: (data: object) => apiClient.post('/persons', data),
+    update: (id: number, data: object) => apiClient.put(`/persons/${id}`, data),
+    delete: (id: number) => apiClient.delete(`/persons/${id}`),
+    search: (query: string) => apiClient.get('/search', { params: { q: query } }),
 }

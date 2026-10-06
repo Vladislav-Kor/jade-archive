@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="isOpen" class="modal-overlay" @click.self="close">
@@ -39,13 +39,14 @@ import Icon from './Icon.vue';
 const props = defineProps({
   title: { type: String, default: 'Модальное окно' },
   icon: { type: String, default: '' },
-  size: { type: String, default: 'md', validator: (v) => ['sm', 'md', 'lg'].includes(v) }
+  size: { type: String, default: 'md', validator: (v) => ['sm', 'md', 'lg'].includes(v) },
+  // Сохранение идёт в окне-владельце: пока true, кнопка заблокирована (нет двойных записей).
+  loading: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['submit', 'close', 'saved']);
+const emit = defineEmits(['submit', 'close']);
 
 const isOpen = ref(false);
-const loading = ref(false);
 
 const sizeClass = computed(() => {
   const sizes = { sm: 'modal-sm', md: 'modal-md', lg: 'modal-lg' };
@@ -63,14 +64,8 @@ const close = () => {
   emit('close');
 };
 
-const handleSubmit = async () => {
-  loading.value = true;
-  try {
-    await emit('submit');
-    emit('saved');
-  } finally {
-    loading.value = false;
-  }
+const handleSubmit = () => {
+  if (!props.loading) emit('submit');
 };
 
 defineExpose({ open, close });

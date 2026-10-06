@@ -1,18 +1,9 @@
-﻿import { apiClient } from '../client'
+import { apiClient } from '../client'
 
 export const categoriesApi = {
-    getAll: () => 
-        apiClient.get('/categories'),
-    
-    get: (id: number) => 
-        apiClient.get(/categories/),
-    
-    create: (data: any) => 
-        apiClient.post('/categories', data),
-    
-    update: (id: number, data: any) => 
-        apiClient.put(/categories/, data),
-    
-    delete: (id: number) => 
-        apiClient.delete(/categories/)
+    getAll: () => apiClient.get('/categories'),
+    getById: (id: number) => apiClient.get(`/categories/${id}`),
+    create: (data: object) => apiClient.post('/categories', data),
+    update: (id: number, data: object) => apiClient.put(`/categories/${id}`, data),
+    delete: (id: number) => apiClient.delete(`/categories/${id}`),
 }

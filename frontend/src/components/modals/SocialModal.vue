@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BaseModal ref="modalRef" :title="isEdit ? '✏️ Редактирование соцсети' : '🌐 Новая социальная сеть'" size="sm">
     <template #body>
       <form @submit.prevent="handleSubmit" id="socialForm">
@@ -55,7 +55,6 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import BaseModal from '../common/BaseModal.vue';
-import { socialApi } from '@/api/endpoints/social';
 import { usePersonStore } from '@/stores/usePersonStore';
 import { useToast } from '@/composables/useToast';
 
@@ -71,17 +70,6 @@ const form = reactive({
   platform: '',
   link: ''
 });
-
-function cleanData(data) {
-  const cleaned = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (value === '' || value === null || value === undefined) {
-      continue;
-    }
-    cleaned[key] = value;
-  }
-  return cleaned;
-}
 
 const resetForm = () => {
   form.platform = '';
@@ -133,18 +121,16 @@ const handleSubmit = async () => {
   
   loading.value = true;
   try {
-    const data = cleanData({ platform: form.platform, link: form.link });
-    
+    const data = { platform: form.platform.trim(), link: form.link.trim() };
+
     if (isEdit.value && currentId.value) {
-      // Для обновления удаляем старую запись и создаем новую
-      await socialApi.delete(currentId.value);
-      await socialApi.create(personStore.currentPerson?.id, data);
+      // Одно обновление (PUT) вместо «удалить и создать»: при сбое ссылка не теряется.
+      await personStore.updateItem('social_media', currentId.value, data);
       success('Соцсеть обновлена');
     } else {
-      await socialApi.create(personStore.currentPerson?.id, data);
+      await personStore.createItem('social_media', data);
       success('Соцсеть добавлена');
     }
-    await personStore.loadPerson(personStore.currentPerson?.id);
     close();
   } catch (err) {
     toastError(err.message || 'Ошибка сохранения');

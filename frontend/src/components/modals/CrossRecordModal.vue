@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div v-if="isOpen" class="modal-overlay" @click.self="close">
         <div class="modal-content">
             <div class="modal-header">
@@ -96,8 +96,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { crossRecordsApi } from '@/api/endpoints/cross-records'
 import { categoriesApi } from '@/api/endpoints/categories'
+import { usePersonStore } from '@/stores/usePersonStore'
 import { useToast } from '@/composables/useToast'
 
+const personStore = usePersonStore()
 const isOpen = ref(false)
 const isEdit = ref(false)
 const isLoading = ref(false)
@@ -246,7 +248,6 @@ const save = async () => {
         isLoading.value = true
         
         const data = {
-            person_id: personId.value,
             title: form.title,
             description: form.description,
             record_type: form.record_type,
@@ -260,22 +261,13 @@ const save = async () => {
             is_private: form.is_private || false
         }
         
-        console.log('💾 Сохранение записи:', data)
-        
-        let result
         if (isEdit.value && recordId.value) {
-            console.log('🔄 Обновление записи ID:', recordId.value)
-            result = await crossRecordsApi.update(recordId.value, data)
+            await personStore.updateItem('cross_records', recordId.value, data)
             success('Запись обновлена')
         } else {
-            console.log('➕ Создание новой записи')
-            result = await crossRecordsApi.create(data)
+            await personStore.createItem('cross_records', data)
             success('Запись создана')
         }
-        
-        console.log('✅ Результат сохранения:', result)
-        
-        emit('saved')
         close()
     } catch (error) {
         console.error('❌ Ошибка сохранения:', error)
@@ -284,8 +276,6 @@ const save = async () => {
         isLoading.value = false
     }
 }
-
-const emit = defineEmits(['saved'])
 
 // Загружаем категории при монтировании
 onMounted(() => {

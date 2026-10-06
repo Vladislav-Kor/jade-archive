@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BaseModal ref="modalRef" :title="isEdit ? '✏️ Редактирование дела' : '📋 Новое дело'" size="md">
     <template #body>
       <form @submit.prevent="handleSubmit" id="caseForm" class="case-form">
@@ -75,6 +75,7 @@ import { ref, reactive } from 'vue';
 import BaseModal from '../common/BaseModal.vue';
 import { casesApi } from '@/api/endpoints/cases';
 import { usePersonStore } from '@/stores/usePersonStore';
+import { toPayload, fillForm } from '@/utils/payload';
 import { useToast } from '@/composables/useToast';
 
 const modalRef = ref(null);
@@ -94,16 +95,6 @@ const form = reactive({
   due_date: ''
 });
 
-function cleanData(data) {
-  const cleaned = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (value === '' || value === null || value === undefined) {
-      continue;
-    }
-    cleaned[key] = value;
-  }
-  return cleaned;
-}
 
 const resetForm = () => {
   form.case_type = '';
@@ -126,7 +117,7 @@ const open = async (id = null) => {
     try {
       const item = await casesApi.getById(id);
       if (item) {
-        Object.assign(form, item);
+        fillForm(form, item);
         if (form.due_date) {
           form.due_date = form.due_date.split('T')[0];
         }
@@ -158,15 +149,14 @@ const handleSubmit = async () => {
   
   loading.value = true;
   try {
-    const data = cleanData({ ...form });
+    const data = toPayload({ ...form }, isEdit.value);
     if (isEdit.value && currentId.value) {
-      await casesApi.update(currentId.value, data);
+      await personStore.updateItem('cases', currentId.value, data);
       success('Дело обновлено');
     } else {
-      await casesApi.create(personStore.currentPerson?.id, data);
+      await personStore.createItem('cases', data);
       success('Дело добавлено');
     }
-    await personStore.refreshCurrent();
     close();
   } catch (err) {
     toastError(err.message || 'Ошибка сохранения');

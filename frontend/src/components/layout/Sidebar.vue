@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="sidebar" :class="{ collapsed: isCollapsed }">
         <!-- Glass effect overlay -->
         <div class="sidebar-glass"></div>
@@ -159,6 +159,11 @@ export default {
         searchQuery: {
             type: String,
             default: ''
+        },
+        // Число связей приходит из стора дерева: в списке людей вложенных relations нет.
+        relationsCount: {
+            type: Number,
+            default: 0
         }
     },
     data() {
@@ -184,7 +189,7 @@ export default {
             return this.persons?.filter(p => p.importance >= 7).length || 0
         },
         getRelationsCount() {
-            return this.persons?.reduce((sum, p) => sum + (p.relations?.length || 0), 0) || 0
+            return this.relationsCount
         },
         refreshData() {
             this.$emit('refresh')

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div v-if="isOpen" class="modal-overlay" @click.self="close">
     <div class="modal-content">
       <div class="modal-header">
@@ -65,7 +65,7 @@
 
           <div class="modal-actions">
             <button type="button" class="btn-cancel" @click="close">Отмена</button>
-            <button type="submit" class="btn-save" :disabled="!canSave">
+            <button type="submit" class="btn-save" :disabled="!canSave || loading">
               {{ isEdit ? 'Сохранить' : 'Создать' }}
             </button>
           </div>
@@ -78,17 +78,21 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { partnersApi } from '@/api/endpoints/partners'
-import { personsApi } from '@/api/endpoints/persons'
+import { usePersonStore } from '@/stores/usePersonStore'
+import { useTreeStore } from '@/stores/useTreeStore'
 import { useToast } from '@/composables/useToast'
+import { toPayload } from '@/utils/payload'
 
-const emit = defineEmits(['saved'])
+const personStore = usePersonStore()
+const treeStore = useTreeStore()
 
 const isOpen = ref(false)
 const loading = ref(false)
 const isEdit = ref(false)
 const personId = ref(null)
 const partnerId = ref(null)
-const availablePersons = ref([])
+// Список людей уже есть в сторе боковой панели и обновляется сам.
+const availablePersons = computed(() => treeStore.persons)
 
 const { success, error: toastError } = useToast()
 
@@ -119,8 +123,6 @@ const open = async (id = null, pid = null) => {
   isEdit.value = !!id
   partnerId.value = id || null
   
-  await loadAvailablePersons()
-  
   if (id) {
     await loadPartner(id)
   } else {
@@ -128,16 +130,6 @@ const open = async (id = null, pid = null) => {
   }
   
   isOpen.value = true
-}
-
-const loadAvailablePersons = async () => {
-  try {
-    const data = await personsApi.getAll()
-    availablePersons.value = data || []
-  } catch (err) {
-    console.error('❌ Ошибка загрузки контактов:', err)
-    availablePersons.value = []
-  }
 }
 
 const loadPartner = async (id) => {
@@ -171,24 +163,16 @@ const save = async () => {
   
   loading.value = true
   try {
-    const data = { 
-      ...form.value,
-      person_id: personId.value
-    }
-    
-    // Очищаем пустые даты
-    if (!data.start_date) data.start_date = null
-    if (!data.end_date) data.end_date = null
-    
+    const data = toPayload({ ...form.value }, isEdit.value)
+
     if (isEdit.value) {
-      await partnersApi.update(partnerId.value, data)
+      await personStore.updateItem('partners', partnerId.value, data)
       success('Партнер обновлен')
     } else {
-      await partnersApi.create(data)
+      await personStore.createItem('partners', data)
       success('Партнер добавлен')
     }
-    
-    emit('saved')
+
     close()
   } catch (err) {
     console.error('❌ Ошибка сохранения:', err)

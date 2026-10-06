@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BaseModal ref="modalRef" title="Добавление связи" icon="link" size="sm">
     <template #body>
       <form @submit.prevent="handleSubmit" id="relationForm">
@@ -30,7 +30,6 @@
 import { ref, reactive, computed } from 'vue';
 import Icon from '../common/Icon.vue';
 import BaseModal from '../common/BaseModal.vue';
-import { relationsApi } from '@/api/endpoints/relations';
 import { useTreeStore } from '@/stores/useTreeStore';
 import { usePersonStore } from '@/stores/usePersonStore';
 import { useToast } from '@/composables/useToast';
@@ -88,12 +87,9 @@ const handleSubmit = async () => {
       relation_type: form.relation_type
     };
     
-    await relationsApi.create(data);
+    // Связь сразу появляется и в дереве, и во вкладке «Связи» открытого контакта.
+    await personStore.createRelation(data);
     success('Связь добавлена');
-    await treeStore.refresh();
-    if (personStore.currentPerson?.id === parentId.value) {
-      await personStore.loadPerson(parentId.value);
-    }
     close();
   } catch (err) {
     toastError(err.message || 'Ошибка добавления связи');

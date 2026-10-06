@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BaseModal ref="modalRef" :title="isEdit ? '✏️ Редактирование аккаунта' : '🎮 Новый цифровой аккаунт'" size="lg">
     <template #body>
       <form @submit.prevent="handleSubmit" id="digitalAccountForm" class="digital-form">
@@ -195,6 +195,7 @@ import { ref, reactive } from 'vue';
 import BaseModal from '../common/BaseModal.vue';
 import { digitalAccountsApi } from '@/api/endpoints/digital-accounts';
 import { usePersonStore } from '@/stores/usePersonStore';
+import { toPayload, fillForm } from '@/utils/payload';
 import { useToast } from '@/composables/useToast';
 
 const modalRef = ref(null);
@@ -232,16 +233,6 @@ const form = reactive({
 });
 
 // Функция очистки данных перед отправкой
-function cleanData(data) {
-  const cleaned = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (value === '' || value === null || value === undefined) {
-      continue;
-    }
-    cleaned[key] = value;
-  }
-  return cleaned;
-}
 
 const resetForm = () => {
   Object.keys(form).forEach(key => {
@@ -263,7 +254,7 @@ const open = async (id = null) => {
     try {
       const account = await digitalAccountsApi.getById(id);
       if (account) {
-        Object.assign(form, account);
+        fillForm(form, account);
         console.log('✅ Данные загружены:', account);
       } else {
         console.error('❌ Данные не найдены для ID:', id);
@@ -292,16 +283,14 @@ const handleSubmit = async () => {
   
   loading.value = true;
   try {
-    const data = cleanData({ ...form });
+    const data = toPayload({ ...form }, isEdit.value);
     if (isEdit.value && currentId.value) {
-      await digitalAccountsApi.update(currentId.value, data);
+      await personStore.updateItem('digital_accounts', currentId.value, data);
       success('Аккаунт обновлен');
     } else {
-      const createData = { ...data, person_id: personStore.currentPerson?.id };
-      await digitalAccountsApi.create(personStore.currentPerson?.id, createData);
+      await personStore.createItem('digital_accounts', data);
       success('Аккаунт добавлен');
     }
-    await personStore.refreshCurrent();
     close();
   } catch (err) {
     toastError(err.message || 'Ошибка сохранения');

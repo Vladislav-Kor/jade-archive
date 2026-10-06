@@ -1,10 +1,11 @@
-﻿<template>
+<template>
     <div class="app">
         <Sidebar
             :persons="treeStore.persons"
             :selected-person-id="treeStore.selectedPersonId"
             :is-loading="treeStore.isLoading"
             :search-query="treeStore.searchQuery"
+            :relations-count="treeStore.relations.length"
             @toggle="handleSidebarToggle"
             @search="handleSearch"
             @refresh="refreshData"
@@ -15,18 +16,18 @@
         />
 
         <main class="main-content">
-            <div v-if="!currentPerson" class="welcome-container">
+            <div v-if="personStore.isLoading" class="loading-container" role="status">
+                <div class="loading-spinner"></div>
+                <p>Загрузка данных...</p>
+            </div>
+
+            <div v-else-if="!currentPerson" class="welcome-container">
                 <div class="welcome-card">
                     <div class="welcome-icon">◆</div>
                     <h1>ARC Agent</h1>
                     <p>Управление контактами и связями</p>
                     <button class="welcome-btn" @click="openPersonModal()">➕ Добавить контакт</button>
                 </div>
-            </div>
-
-            <div v-else-if="personStore.isLoading" class="loading-container">
-                <div class="loading-spinner"></div>
-                <p>Загрузка данных...</p>
             </div>
 
             <ProfileView
@@ -43,18 +44,19 @@
         </main>
 
         <!-- Модальные окна -->
-        <PersonModal ref="personModalRef" @saved="onDataSaved" />
-        <RelationModal ref="relationModalRef" @saved="onDataSaved" />
-        <SocialModal ref="socialModalRef" @saved="onDataSaved" />
-        <DigitalAccountModal ref="digitalAccountModalRef" @saved="onDataSaved" />
-        <RealEstateModal ref="realEstateModalRef" @saved="onDataSaved" />
-        <VehicleModal ref="vehicleModalRef" @saved="onDataSaved" />
-        <CaseModal ref="caseModalRef" @saved="onDataSaved" />
-        <MedicalModal ref="medicalModalRef" @saved="onDataSaved" />
-        <CrossRecordModal ref="crossRecordModalRef" @saved="onDataSaved" />
-        <PartnerModal ref="partnerModalRef" @saved="onDataSaved" />
-        <DeviceModal ref="deviceModalRef" @saved="onDataSaved" />
+        <PersonModal ref="personModalRef" />
+        <RelationModal ref="relationModalRef" />
+        <SocialModal ref="socialModalRef" />
+        <DigitalAccountModal ref="digitalAccountModalRef" />
+        <RealEstateModal ref="realEstateModalRef" />
+        <VehicleModal ref="vehicleModalRef" />
+        <CaseModal ref="caseModalRef" />
+        <MedicalModal ref="medicalModalRef" />
+        <CrossRecordModal ref="crossRecordModalRef" />
+        <PartnerModal ref="partnerModalRef" />
+        <DeviceModal ref="deviceModalRef" />
         <ConfirmModal ref="confirmModalRef" />
+        <ToastHost />
     </div>
 </template>
 
@@ -62,17 +64,6 @@
 import { computed, ref, onMounted } from 'vue'
 import { useTreeStore } from './stores/useTreeStore'
 import { usePersonStore } from './stores/usePersonStore'
-import { personsApi } from './api/endpoints/persons'
-import { relationsApi } from './api/endpoints/relations'
-import { digitalAccountsApi } from './api/endpoints/digital-accounts'
-import { realEstateApi } from './api/endpoints/real-estate'
-import { vehiclesApi } from './api/endpoints/vehicles'
-import { casesApi } from './api/endpoints/cases'
-import { medicalApi } from './api/endpoints/medical'
-import { socialApi } from './api/endpoints/social'
-import { crossRecordsApi } from './api/endpoints/cross-records'
-import { partnersApi } from './api/endpoints/partners'
-import { devicesApi } from './api/endpoints/devices'
 import { useToast } from './composables/useToast'
 
 import Sidebar from './components/layout/Sidebar.vue'
@@ -89,6 +80,7 @@ import CrossRecordModal from './components/modals/CrossRecordModal.vue'
 import PartnerModal from './components/modals/PartnerModal.vue'
 import DeviceModal from './components/modals/DeviceModal.vue'
 import ConfirmModal from './components/common/ConfirmModal.vue'
+import ToastHost from './components/common/ToastHost.vue'
 
 const treeStore = useTreeStore()
 const personStore = usePersonStore()
@@ -118,38 +110,15 @@ const handleSearch = (query) => {
 }
 
 const selectContact = async (id) => {
-    console.log('🔄 Выбор контакта:', id)
-    if (!id) {
-        console.error('❌ ID не передан')
-        return
-    }
-    try {
-        treeStore.selectPerson(id)
-        await personStore.loadPerson(id)
-        console.log('✅ Контакт загружен:', currentPerson.value?.full_name)
-    } catch (error) {
-        console.error('❌ Ошибка загрузки контакта:', error)
-        toastError('Ошибка загрузки контакта')
-    }
+    if (!id) return
+    treeStore.selectPerson(id)
+    await personStore.loadPerson(id)  // ошибки показывает стор
 }
 
+// Полная перезагрузка — только при старте и по кнопке «Обновить». После CRUD сторы обновляются сами.
 const refreshData = async () => {
-    console.log('🔄 Обновление данных...')
-    try {
-        await treeStore.refresh()
-        console.log('✅ Данные обновлены, людей:', treeStore.persons.length)
-    } catch (error) {
-        console.error('❌ Ошибка обновления данных:', error)
-        toastError('Ошибка обновления данных')
-    }
-}
-
-const onDataSaved = async () => {
-    await refreshData()
-    if (currentPerson.value) {
-        await personStore.loadPerson(currentPerson.value.id)
-    }
-    success('Сохранено')
+    await Promise.all([treeStore.refresh(), personStore.refreshCurrent()])
+    if (treeStore.error) toastError(treeStore.error)
 }
 
 // ===== УНИВЕРСАЛЬНЫЙ МЕТОД ОТКРЫТИЯ МОДАЛЬНЫХ ОКОН =====
@@ -307,62 +276,42 @@ const handleEditItem = (id) => {
     }
 }
 
+// Вкладка профиля → коллекция в сторе
+const TAB_COLLECTION = {
+    relations: 'relations',
+    realestate: 'real_estate',
+    vehicles: 'vehicles',
+    digital: 'digital_accounts',
+    social: 'social_media',
+    cases: 'cases',
+    medical: 'medical_records',
+    partners: 'partners',
+    devices: 'devices',
+    cross: 'cross_records',
+    cross_records: 'cross_records',
+}
+
 const handleDeleteItem = async ({ id, type }) => {
-    console.log('🗑️ Удаление элемента:', id, type)
-    
-    if (!confirmModalRef.value) {
-        console.error('❌ ConfirmModal не найден')
-        return
-    }
-    
-    const confirmed = await confirmModalRef.value.open('Удалить элемент?')
-    if (!confirmed) return
-
-    const deleteMap = {
-        relations: relationsApi.delete,
-        realestate: realEstateApi.delete,
-        vehicles: vehiclesApi.delete,
-        digital: digitalAccountsApi.delete,
-        social: socialApi.delete,
-        cases: casesApi.delete,
-        medical: medicalApi.delete,
-        cross_records: crossRecordsApi.delete,
-        cross: crossRecordsApi.delete,
-        partners: partnersApi.delete,
-        devices: devicesApi.delete
-    }
-
-    const deleteFn = deleteMap[type]
-    if (!deleteFn) {
-        console.error('❌ Неизвестный тип для удаления:', type)
-        return
-    }
-
+    const key = TAB_COLLECTION[type]
+    if (!key || !confirmModalRef.value) return
+    if (!(await confirmModalRef.value.open('Удалить элемент?'))) return
     try {
-        await deleteFn(id)
+        await personStore.deleteItem(key, id)  // запись исчезает сразу, при ошибке возвращается
         success('Удалено')
-        if (currentPerson.value) {
-            await personStore.loadPerson(currentPerson.value.id)
-        }
     } catch (err) {
-        toastError('Ошибка удаления')
-        console.error('❌ Ошибка удаления:', err)
+        toastError(`Не удалось удалить: ${err.message}`)
     }
 }
 
 const confirmDeletePerson = async () => {
-    if (!confirmModalRef.value) return
-    const confirmed = await confirmModalRef.value.open('Удалить контакт? Это действие необратимо!')
-    if (confirmed && currentPerson.value) {
-        try {
-            await personsApi.delete(currentPerson.value.id)
-            success('Контакт удален')
-            await refreshData()
-            personStore.clearCurrent()
-        } catch (error) {
-            toastError('Ошибка удаления контакта')
-            console.error('❌ Ошибка удаления контакта:', error)
-        }
+    const person = currentPerson.value
+    if (!person || !confirmModalRef.value) return
+    if (!(await confirmModalRef.value.open('Удалить контакт? Это действие необратимо!'))) return
+    try {
+        await personStore.deletePerson(person.id)
+        success('Контакт удален')
+    } catch (err) {
+        toastError(`Не удалось удалить контакт: ${err.message}`)
     }
 }
 

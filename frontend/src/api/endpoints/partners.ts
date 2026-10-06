@@ -1,9 +1,4 @@
-﻿import { apiClient } from '../client'
+import { personResource } from '../resource'
 
-export const partnersApi = {
-  getForPerson: (personId: number) => apiClient.get(`/persons/${personId}/partners`),
-  getById: (id: number) => apiClient.get(`/partners/${id}`),
-  create: (data: any) => apiClient.post(`/persons/${data.person_id}/partners`, data),
-  update: (id: number, data: any) => apiClient.put(`/partners/${id}`, data),
-  delete: (id: number) => apiClient.delete(`/partners/${id}`),
-}
+// Бэкенд требует person_id и в пути, и в теле запроса.
+export const partnersApi = personResource('partners', { personIdInBody: true })

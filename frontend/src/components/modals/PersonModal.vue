@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BaseModal ref="modalRef" :title="isEdit ? '✏️ Редактирование контакта' : '➕ Новый контакт'" size="lg">
     <template #body>
       <form @submit.prevent="handleSubmit" id="personForm" class="person-form">
@@ -276,6 +276,7 @@ import { personsApi } from '@/api/endpoints/persons';
 import { useTreeStore } from '@/stores/useTreeStore';
 import { usePersonStore } from '@/stores/usePersonStore';
 import { useToast } from '@/composables/useToast';
+import { toPayload, fillForm } from '@/utils/payload';
 
 const modalRef = ref(null);
 const treeStore = useTreeStore();
@@ -329,18 +330,6 @@ const form = reactive({
   notes: ''
 });
 
-// Функция очистки данных перед отправкой
-function cleanData(data) {
-  const cleaned = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (value === '' || value === null || value === undefined) {
-      continue;
-    }
-    cleaned[key] = value;
-  }
-  return cleaned;
-}
-
 const resetForm = () => {
   Object.keys(form).forEach(key => {
     if (key === 'children_count') form[key] = 0;
@@ -360,7 +349,7 @@ const open = async (id = null) => {
     currentId.value = id;
     try {
       const person = await personsApi.getById(id);
-      Object.assign(form, person);
+      fillForm(form, person);
       if (person.birth_date) {
         form.birth_date = person.birth_date.split('T')[0];
       }
@@ -384,17 +373,16 @@ const handleSubmit = async () => {
   
   loading.value = true;
   try {
-    const data = cleanData({ ...form });
+    const data = toPayload({ ...form }, isEdit.value);
     if (isEdit.value && currentId.value) {
-      await personsApi.update(currentId.value, data);
+      // Профиль и строка в боковой панели обновляются ответом сервера, вкладки не перезагружаются.
+      await personStore.updatePerson(currentId.value, data);
       success('Контакт обновлен');
     } else {
-      await personsApi.create(data);
+      const created = await personStore.createPerson(data);
       success('Контакт добавлен');
-    }
-    await treeStore.refresh();
-    if (currentId.value) {
-      await personStore.loadPerson(currentId.value);
+      treeStore.selectPerson(created.id);
+      personStore.loadPerson(created.id);  // сразу открываем новый контакт
     }
     close();
   } catch (err) {

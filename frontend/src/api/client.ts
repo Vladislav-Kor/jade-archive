@@ -1,30 +1,39 @@
-import axios from 'axios';
+import axios from 'axios'
 
 export const apiClient = axios.create({
     baseURL: '/api',
     headers: { 'Content-Type': 'application/json' },
     timeout: 10000,
-});
+})
 
-// Интерцептор для обработки ошибок и ретраев
+export class ApiError extends Error {
+    status?: number
+
+    constructor(message: string, status?: number) {
+        super(message)
+        this.status = status
+    }
+}
+
+/** РџРѕРЅСЏС‚РЅС‹Р№ С‚РµРєСЃС‚ РѕС€РёР±РєРё: detail FastAPI (СЃС‚СЂРѕРєР° РёР»Рё СЃРїРёСЃРѕРє РѕС€РёР±РѕРє РІР°Р»РёРґР°С†РёРё 422) РёР»Рё СЃРµС‚СЊ. */
+export function errorMessage(error: any): string {
+    const detail = error.response?.data?.detail
+    if (typeof detail === 'string') return detail
+    if (Array.isArray(detail)) return detail.map((d) => d.msg).join('; ')
+    if (error.code === 'ECONNABORTED') return 'РЎРµСЂРІРµСЂ РЅРµ РѕС‚РІРµС‚РёР» РІРѕРІСЂРµРјСЏ'
+    if (error.response) return `РћС€РёР±РєР° СЃРµСЂРІРµСЂР° (${error.response.status})`
+    return 'РќРµС‚ СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј'
+}
+
 apiClient.interceptors.response.use(
     (response) => response.data,
     async (error) => {
-        const originalRequest = error.config;
-        if (error.response?.status === 401) {
-            // Перенаправление на страницу логина (реализовать позже)
-            console.warn('401 Unauthorized – redirect to login');
+        const request = error.config
+        // РџРѕРІС‚РѕСЂСЏРµРј С‚РѕР»СЊРєРѕ С‡С‚РµРЅРёРµ: РїРѕРІС‚РѕСЂ POST/PUT РїРѕСЃР»Рµ С‚Р°Р№РјР°СѓС‚Р° РјРѕРі Р±С‹ СЃРѕР·РґР°С‚СЊ РґСѓР±Р»РёРєР°С‚.
+        if (error.code === 'ECONNABORTED' && request?.method === 'get' && !request._retried) {
+            request._retried = true
+            return apiClient(request)
         }
-        if (error.code === 'ECONNABORTED' && !originalRequest._retry) {
-            originalRequest._retry = true;
-            try {
-                return await apiClient(originalRequest);
-            } catch (retryError) {
-                console.error('Retry failed:', retryError);
-            }
-        }
-        const message = error.response?.data?.detail || error.message || 'Ошибка запроса';
-        console.error('API Error:', message);
-        return Promise.reject(new Error(message));
-    }
-);
+        return Promise.reject(new ApiError(errorMessage(error), error.response?.status))
+    },
+)

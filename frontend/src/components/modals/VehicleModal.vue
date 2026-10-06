@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BaseModal ref="modalRef" :title="isEdit ? '✏️ Редактирование ТС' : '🚗 Новое транспортное средство'" size="lg">
     <template #body>
       <form @submit.prevent="handleSubmit" id="vehicleForm" class="vehicle-form">
@@ -254,6 +254,7 @@ import { ref, reactive } from 'vue';
 import BaseModal from '../common/BaseModal.vue';
 import { vehiclesApi } from '@/api/endpoints/vehicles';
 import { usePersonStore } from '@/stores/usePersonStore';
+import { toPayload, fillForm } from '@/utils/payload';
 import { useToast } from '@/composables/useToast';
 
 const modalRef = ref(null);
@@ -300,16 +301,6 @@ const form = reactive({
   is_active: true
 });
 
-function cleanData(data) {
-  const cleaned = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (value === '' || value === null || value === undefined) {
-      continue;
-    }
-    cleaned[key] = value;
-  }
-  return cleaned;
-}
 
 const resetForm = () => {
   Object.keys(form).forEach(key => {
@@ -331,7 +322,7 @@ const open = async (id = null) => {
     try {
       const item = await vehiclesApi.getById(id);
       if (item) {
-        Object.assign(form, item);
+        fillForm(form, item);
         if (form.registration_date) {
           form.registration_date = form.registration_date.split('T')[0];
         }
@@ -375,15 +366,14 @@ const handleSubmit = async () => {
   
   loading.value = true;
   try {
-    const data = cleanData({ ...form });
+    const data = toPayload({ ...form }, isEdit.value);
     if (isEdit.value && currentId.value) {
-      await vehiclesApi.update(currentId.value, data);
+      await personStore.updateItem('vehicles', currentId.value, data);
       success('ТС обновлено');
     } else {
-      await vehiclesApi.create(personStore.currentPerson?.id, data);
+      await personStore.createItem('vehicles', data);
       success('ТС добавлено');
     }
-    await personStore.refreshCurrent();
     close();
   } catch (err) {
     toastError(err.message || 'Ошибка сохранения');

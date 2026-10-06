@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div v-if="isOpen" class="modal-overlay" @click.self="close">
     <div class="modal-content">
       <div class="modal-header">
@@ -104,7 +104,7 @@
 
           <div class="modal-actions">
             <button type="button" class="btn-cancel" @click="close">Отмена</button>
-            <button type="submit" class="btn-save" :disabled="!canSave">
+            <button type="submit" class="btn-save" :disabled="!canSave || loading">
               {{ isEdit ? 'Сохранить' : 'Создать' }}
             </button>
           </div>
@@ -117,9 +117,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { devicesApi } from '@/api/endpoints/devices'
+import { usePersonStore } from '@/stores/usePersonStore'
 import { useToast } from '@/composables/useToast'
+import { toPayload } from '@/utils/payload'
 
-const emit = defineEmits(['saved'])
+const personStore = usePersonStore()
 
 const isOpen = ref(false)
 const loading = ref(false)
@@ -204,23 +206,16 @@ const save = async () => {
   
   loading.value = true
   try {
-    const data = { 
-      ...form.value,
-      person_id: personId.value
-    }
-    
-    if (!data.purchase_date) data.purchase_date = null
-    if (!data.warranty_until) data.warranty_until = null
-    
+    const data = toPayload({ ...form.value }, isEdit.value)
+
     if (isEdit.value) {
-      await devicesApi.update(deviceId.value, data)
+      await personStore.updateItem('devices', deviceId.value, data)
       success('Устройство обновлено')
     } else {
-      await devicesApi.create(data)
+      await personStore.createItem('devices', data)
       success('Устройство добавлено')
     }
-    
-    emit('saved')
+
     close()
   } catch (err) {
     console.error('❌ Ошибка сохранения:', err)

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BaseModal ref="modalRef" :title="isEdit ? '✏️ Редактирование записи' : '🏥 Новая медицинская запись'" size="md">
     <template #body>
       <form @submit.prevent="handleSubmit" id="medicalForm" class="medical-form">
@@ -72,6 +72,7 @@ import { ref, reactive } from 'vue';
 import BaseModal from '../common/BaseModal.vue';
 import { medicalApi } from '@/api/endpoints/medical';
 import { usePersonStore } from '@/stores/usePersonStore';
+import { toPayload, fillForm } from '@/utils/payload';
 import { useToast } from '@/composables/useToast';
 
 const modalRef = ref(null);
@@ -91,16 +92,6 @@ const form = reactive({
   attachments: ''
 });
 
-function cleanData(data) {
-  const cleaned = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (value === '' || value === null || value === undefined) {
-      continue;
-    }
-    cleaned[key] = value;
-  }
-  return cleaned;
-}
 
 const resetForm = () => {
   Object.keys(form).forEach(key => form[key] = '');
@@ -118,7 +109,7 @@ const open = async (id = null) => {
     try {
       const item = await medicalApi.getById(id);
       if (item) {
-        Object.assign(form, item);
+        fillForm(form, item);
         if (form.record_date) {
           form.record_date = form.record_date.split('T')[0];
         }
@@ -150,15 +141,14 @@ const handleSubmit = async () => {
   
   loading.value = true;
   try {
-    const data = cleanData({ ...form });
+    const data = toPayload({ ...form }, isEdit.value);
     if (isEdit.value && currentId.value) {
-      await medicalApi.update(currentId.value, data);
+      await personStore.updateItem('medical_records', currentId.value, data);
       success('Запись обновлена');
     } else {
-      await medicalApi.create(personStore.currentPerson?.id, data);
+      await personStore.createItem('medical_records', data);
       success('Запись добавлена');
     }
-    await personStore.refreshCurrent();
     close();
   } catch (err) {
     toastError(err.message || 'Ошибка сохранения');

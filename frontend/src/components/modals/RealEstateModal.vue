@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <BaseModal ref="modalRef" :title="isEdit ? '✏️ Редактирование недвижимости' : '🏢 Новая недвижимость'" size="lg">
     <template #body>
       <form @submit.prevent="handleSubmit" id="realEstateForm" class="real-estate-form">
@@ -185,6 +185,7 @@ import { ref, reactive } from 'vue';
 import BaseModal from '../common/BaseModal.vue';
 import { realEstateApi } from '@/api/endpoints/real-estate';
 import { usePersonStore } from '@/stores/usePersonStore';
+import { toPayload, fillForm } from '@/utils/payload';
 import { useToast } from '@/composables/useToast';
 
 const modalRef = ref(null);
@@ -223,16 +224,6 @@ const form = reactive({
   is_active: true
 });
 
-function cleanData(data) {
-  const cleaned = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (value === '' || value === null || value === undefined) {
-      continue;
-    }
-    cleaned[key] = value;
-  }
-  return cleaned;
-}
 
 const resetForm = () => {
   Object.keys(form).forEach(key => {
@@ -255,7 +246,7 @@ const open = async (id = null) => {
     try {
       const item = await realEstateApi.getById(id);
       if (item) {
-        Object.assign(form, item);
+        fillForm(form, item);
         if (form.registration_date) {
           form.registration_date = form.registration_date.split('T')[0];
         }
@@ -287,18 +278,17 @@ const handleSubmit = async () => {
   
   loading.value = true;
   try {
-    const data = cleanData({ ...form });
+    const data = toPayload({ ...form }, isEdit.value);
     if (isEdit.value && currentId.value) {
-      await realEstateApi.update(currentId.value, data);
+      await personStore.updateItem('real_estate', currentId.value, data);
       success('Недвижимость обновлена');
     } else {
-      await realEstateApi.create(personStore.currentPerson?.id, data);
+      await personStore.createItem('real_estate', data);
       success('Недвижимость добавлена');
     }
-    await personStore.refreshCurrent();
     close();
   } catch (err) {
-    toastError(err.response?.data?.detail || err.message || 'Ошибка сохранения');
+    toastError(err.message || 'Ошибка сохранения');
   } finally {
     loading.value = false;
   }
