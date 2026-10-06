@@ -1,4 +1,4 @@
-﻿from fastapi import FastAPI, Depends, HTTPException
+﻿from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
@@ -69,14 +69,11 @@ def create_person(person: schemas.PersonCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Short name already exists")
     return crud.create_person(db, person)
 
-@app.get("/api/persons", response_model=List[schemas.PersonResponse])
-def list_persons(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    persons = crud.get_persons(db, skip=skip, limit=limit)
-    for person in persons:
-        person.social_media = crud.get_social_media(db, person.id)
-        person.tags_prefs = crud.get_tags(db, person.id)
-        person.digital_accounts = crud.get_digital_accounts(db, person.id)
-    return persons
+@app.get("/api/persons", response_model=List[schemas.PersonListItem])
+def list_persons(skip: int = 0, limit: int = Query(1000, ge=1, le=1000), db: Session = Depends(get_db)):
+    # Список для боковой панели и выпадающих списков: без вложенных коллекций
+    # (раньше здесь уходили аккаунты с паролями всех людей и по 3 запроса на человека).
+    return crud.get_persons(db, skip=skip, limit=limit)
 
 @app.get("/api/persons/{person_id}", response_model=schemas.PersonResponse)
 def get_person(person_id: int, db: Session = Depends(get_db)):
@@ -104,14 +101,9 @@ def delete_person(person_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Person not found")
     return {"message": "Person deleted"}
 
-@app.get("/api/search")
+@app.get("/api/search", response_model=List[schemas.PersonListItem])
 def search_persons(q: str, db: Session = Depends(get_db)):
-    persons = crud.search_persons(db, q)
-    for person in persons:
-        person.social_media = crud.get_social_media(db, person.id)
-        person.tags_prefs = crud.get_tags(db, person.id)
-        person.digital_accounts = crud.get_digital_accounts(db, person.id)
-    return persons
+    return crud.search_persons(db, q)
 
 # ============================================
 # Tree Endpoint
@@ -166,7 +158,7 @@ def get_person_relations(person_id: int, db: Session = Depends(get_db)):
         result.append({"id": rel.id, "direction": "incoming", "person_name": parent.full_name if parent else "Unknown", "person_id": rel.parent_id, "relation_type": rel.relation_type})
     return result
 
-@app.post("/api/relations", response_model=schemas.RelationResponse)
+@app.post("/api/relations", response_model=schemas.RelationResponse, status_code=201)
 def create_relation(relation: schemas.RelationCreate, db: Session = Depends(get_db)):
     parent = crud.get_person(db, relation.parent_id)
     child = crud.get_person(db, relation.child_id)
@@ -186,8 +178,16 @@ def delete_relation(relation_id: int, db: Session = Depends(get_db)):
 # Social Media Endpoints
 # ============================================
 
-@app.post("/api/persons/{person_id}/social")
+@app.get("/api/persons/{person_id}/social", response_model=List[schemas.SocialMediaResponse])
+def get_person_social_media(person_id: int, db: Session = Depends(get_db)):
+    if not crud.get_person(db, person_id):
+        raise HTTPException(status_code=404, detail="Person not found")
+    return crud.get_social_media(db, person_id)
+
+@app.post("/api/persons/{person_id}/social", response_model=schemas.SocialMediaResponse, status_code=201)
 def add_social_media(person_id: int, social: schemas.SocialMediaBase, db: Session = Depends(get_db)):
+    if not crud.get_person(db, person_id):
+        raise HTTPException(status_code=404, detail="Person not found")
     return crud.add_social_media(db, person_id, social)
 
 @app.delete("/api/social/{social_id}")
@@ -228,7 +228,7 @@ def get_digital_account(account_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Digital account not found")
     return account
 
-@app.post("/api/persons/{person_id}/digital-accounts", response_model=schemas.DigitalAccountResponse)
+@app.post("/api/persons/{person_id}/digital-accounts", response_model=schemas.DigitalAccountResponse, status_code=201)
 def create_digital_account(person_id: int, account: schemas.DigitalAccountCreate, db: Session = Depends(get_db)):
     person = crud.get_person(db, person_id)
     if not person:
@@ -323,43 +323,6 @@ def delete_medical_record(record_id: int, db: Session = Depends(get_db)):
     if not crud.delete_medical_record(db, record_id):
         raise HTTPException(status_code=404, detail="Medical record not found")
     return {"message": "Medical record deleted"}
-# ============================================
-
-@app.get("/api/persons/{person_id}/medical", response_model=List[schemas.MedicalRecordResponse])
-def get_person_medical_records(person_id: int, db: Session = Depends(get_db)):
-    person = crud.get_person(db, person_id)
-    if not person:
-        raise HTTPException(status_code=404, detail="Person not found")
-    return crud.get_medical_records(db, person_id)
-
-@app.get("/api/medical/{record_id}", response_model=schemas.MedicalRecordResponse)
-def get_medical_record(record_id: int, db: Session = Depends(get_db)):
-    record = crud.get_medical_record(db, record_id)
-    if not record:
-        raise HTTPException(status_code=404, detail="Medical record not found")
-    return record
-
-@app.post("/api/persons/{person_id}/medical", response_model=schemas.MedicalRecordResponse, status_code=201)
-def create_medical_record(person_id: int, record: schemas.MedicalRecordCreate, db: Session = Depends(get_db)):
-    person = crud.get_person(db, person_id)
-    if not person:
-        raise HTTPException(status_code=404, detail="Person not found")
-    return crud.create_medical_record(db, person_id, record)
-
-@app.put("/api/medical/{record_id}", response_model=schemas.MedicalRecordResponse)
-def update_medical_record(record_id: int, record: schemas.MedicalRecordUpdate, db: Session = Depends(get_db)):
-    updated = crud.update_medical_record(db, record_id, record)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Medical record not found")
-    return updated
-
-@app.delete("/api/medical/{record_id}")
-def delete_medical_record(record_id: int, db: Session = Depends(get_db)):
-    if not crud.delete_medical_record(db, record_id):
-        raise HTTPException(status_code=404, detail="Medical record not found")
-    return {"message": "Medical record deleted"}
-
-# ============================================
 
 # ============================================
 # Real Estate Endpoints
@@ -579,40 +542,7 @@ def delete_cross_record(record_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Record not found")
     return {"message": "Record deleted"}
 
-# ============================================
-# Category Endpoints
-# ============================================
-
-@app.get("/api/categories", response_model=List[schemas.CategoryResponse])
-def get_categories(parent_id: int = None, db: Session = Depends(get_db)):
-    return crud.get_categories(db, parent_id)
-
-@app.get("/api/categories/{category_id}", response_model=schemas.CategoryResponse)
-def get_category(category_id: int, db: Session = Depends(get_db)):
-    category = crud.get_category(db, category_id)
-    if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
-    return category
-
-@app.post("/api/categories", response_model=schemas.CategoryResponse, status_code=201)
-def create_category(category: schemas.CategoryCreate, db: Session = Depends(get_db)):
-    existing = crud.get_category_by_slug(db, category.slug)
-    if existing:
-        raise HTTPException(status_code=400, detail="Category with this slug already exists")
-    return crud.create_category(db, category)
-
-@app.put("/api/categories/{category_id}", response_model=schemas.CategoryResponse)
-def update_category(category_id: int, category: schemas.CategoryUpdate, db: Session = Depends(get_db)):
-    updated = crud.update_category(db, category_id, category)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Category not found")
-    return updated
-
-@app.delete("/api/categories/{category_id}")
-def delete_category(category_id: int, db: Session = Depends(get_db)):
-    if not crud.delete_category(db, category_id):
-        raise HTTPException(status_code=404, detail="Category not found")
-    return {"message": "Category deleted"}
+# Категории — в api_extension.py (register_extension_routes): там единственная реализация.
 
 # ============================================
 # Startup Event

@@ -58,6 +58,42 @@ def register_extension_routes(app: FastAPI):
                 detail=f"Failed to get categories: {str(e)}"
             )
     
+    # /tree регистрируется раньше /{category_id}, иначе "tree" разбирается как id и даёт 422.
+    @app.get(
+        "/api/categories/tree",
+        response_model=List[dict],
+        summary="Get categories as tree"
+    )
+    def get_category_tree(
+        db: Session = Depends(get_db)
+    ):
+        """
+        Get categories as hierarchical tree
+        """
+        try:
+            categories = db.query(models.Category).all()
+            
+            result = []
+            for category in categories:
+                result.append({
+                    "id": category.id,
+                    "name": category.name,
+                    "slug": category.slug,
+                    "icon": category.icon,
+                    "color": category.color,
+                    "description": category.description,
+                    "created_at": category.created_at,
+                    "updated_at": category.updated_at
+                })
+            
+            return result
+        except Exception as e:
+            logger.error(f"Error getting category tree: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to get category tree: {str(e)}"
+            )
+    
     @app.get(
         "/api/categories/{category_id}",
         response_model=schemas.CategoryResponse,
@@ -273,41 +309,6 @@ def register_extension_routes(app: FastAPI):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Failed to delete category: {str(e)}"
-            )
-    
-    @app.get(
-        "/api/categories/tree",
-        response_model=List[dict],
-        summary="Get categories as tree"
-    )
-    def get_category_tree(
-        db: Session = Depends(get_db)
-    ):
-        """
-        Get categories as hierarchical tree
-        """
-        try:
-            categories = db.query(models.Category).all()
-            
-            result = []
-            for category in categories:
-                result.append({
-                    "id": category.id,
-                    "name": category.name,
-                    "slug": category.slug,
-                    "icon": category.icon,
-                    "color": category.color,
-                    "description": category.description,
-                    "created_at": category.created_at,
-                    "updated_at": category.updated_at
-                })
-            
-            return result
-        except Exception as e:
-            logger.error(f"Error getting category tree: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to get category tree: {str(e)}"
             )
     
     logger.info("Extension routes registered successfully")

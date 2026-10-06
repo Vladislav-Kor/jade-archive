@@ -549,6 +549,14 @@ class PersonUpdate(BaseModel):
     importance_level: Optional[str] = None
     notes: Optional[str] = None
 
+class PersonListItem(PersonBase):
+    """Человек в списках (боковая панель, выбор связи): без вложенных коллекций и секретов аккаунтов."""
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
 class PersonResponse(PersonBase):
     id: int
     created_at: Optional[datetime] = None
