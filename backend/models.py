@@ -5,11 +5,13 @@ Optimized for MySQL with proper column types to avoid row size limits
 """
 
 from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Boolean, Text, ForeignKey, Index, UniqueConstraint, JSON
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from datetime import datetime
 
-Base = declarative_base()
+# Один Base на всё приложение: init_db() создаёт таблицы по database.Base.
+# Раньше здесь был собственный declarative_base(), и init_db() не создавал ни одной таблицы.
+from database import Base
 
 class Person(Base):
     __tablename__ = "persons"
