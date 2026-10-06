@@ -1,39 +1,57 @@
-services:
+﻿services:
   db:
-    image: postgres:15
+    image: mysql:8
     container_name: jade_db
     environment:
-      POSTGRES_USER: jade_user
-      POSTGRES_PASSWORD: jade_password
-      POSTGRES_DB: jade_archive
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: jade_archive
+      MYSQL_USER: jade_user
+      MYSQL_PASSWORD: jade_password
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
     networks:
       - jade_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   app:
     build: ./backend
     container_name: jade_app
     environment:
-      DATABASE_URL: postgresql://jade_user:jade_password@db:5432/jade_archive
+      DATABASE_URL: mysql+pymysql://jade_user:jade_password@db:3306/jade_archive?charset=utf8mb4
     ports:
       - "8000:8000"
     networks:
       - jade_network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
-  frontend:
-    build: ./frontend
-    container_name: jade_frontend
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: jade_phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: jade_user
+      PMA_PASSWORD: jade_password
+      UPLOAD_LIMIT: 300M
     ports:
-      - "3000:80"
+      - "8081:80"
     networks:
       - jade_network
     depends_on:
-      - app
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
 networks:
@@ -41,4 +59,4 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  mysql_data:

@@ -1,356 +1,372 @@
-# ARK (Archive Registry by Korchagin)
 
-> **Проект:** Jade Archive
-> **Статус:** Личный реестр стратегических связей
-> **Концепция:** Ковчег (ARK) — защищенное цифровое пространство для сохранения данных о людях, имеющих ключевое значение для будущего и текущих инициатив.
+# 🗄️ A.R.K. - Archive Registry by Korchagin
 
-## 📜 О проекте
-
-**ARK** — это структурированная база данных, разработанная в рамках проекта **Jade Archive**. В отличие от обычных записных книжек, ARK фокусируется на долгосрочной ценности каждого контакта, формируя «золотой фонд» личностей, отобранных лично Корчагиным.
-
-### Расшифровка акронима
-
-- **A** — Archive (Архив)
-- **R** — Registry (Реестр)
-- **K** — Korchagin (Корчагин)
-
-## 🎯 Цели системы
-
-1. **Сохранение (Preservation):** Защита критически важной информации о ключевых узлах сети (людях).
-2. **Структурирование (Organization):** Категоризация связей по степени важности, компетенциям и истории взаимодействия.
-3. **Стратегия (Future-proofing):** Формирование кадрового и интеллектуального резерва для будущих проектов Jade.
-
-_Сформировано в рамках архитектуры Jade Archive. Данные являются конфиденциальными._
-
----
-
-## 📁 Jade Archive - Нефритовая CRM
-
-## Полная документация проекта
-
----
-
-## 📋 Оглавление
-
-1. [Описание проекта](#описание-проекта)
-2. [Технологии](#технологии)
-3. [Функциональные возможности](#функциональные-возможности)
-4. [Структура проекта](#структура-проекта)
-5. [Установка и запуск](#установка-и-запуск)
-6. [Настройка под себя](#настройка-под-себя)
-7. [API Эндпоинты](#api-эндпоинты)
-8. [Telegram Бот](#telegram-бот)
-9. [База данных](#база-данных)
-10. [Устранение проблем](#устранение-проблем)
-
----
-
-## Описание проекта
-
-**Jade Archive** — это локальная CRM-система для управления социальным графом и персональными досье. Приложение позволяет создавать иерархическую структуру контактов, отслеживать связи между людьми, хранить расширенную информацию о каждом человеке (медицинские данные, документы, предпочтения) и управлять делами/проектами.
-
-### Ключевые особенности
-
-- 🌳 **Иерархическое дерево контактов** - один человек может находиться в нескольких папках
-- 📋 **Расширенное досье** - медицинские данные, документы, параметры тела, предпочтения
-- 🔗 **Гибкая система связей** - любые типы отношений между людьми
-- 🎨 **Темный нефритовый дизайн** - стильный интерфейс с CSS-иконками папок
-- 🤖 **Telegram бот** - управление контактами через мессенджер
-- 🐳 **Docker контейнеризация** - легкий запуск в любом окружении
-
----
-
-## Технологии
-
-### Backend
-
-| Технология | Версия | Назначение |
-| ---------- | ------- | --------------------- |
-| Python | 3.11 | Язык программирования |
-| FastAPI | 0.104.1 | Веб-фреймворк |
-| SQLAlchemy | 2.0.23 | ORM для работы с БД |
-| PostgreSQL | 15 | Основная база данных |
-| Pydantic | 2.5.0 | Валидация данных |
-| Uvicorn | 0.24.0 | ASGI сервер |
-
+## 📋 О проекте
+**A.R.K. (Archive Registry by Korchagin)** - это современное веб-приложение для управления личными контактами и связями между ними. Система позволяет вести подробное досье на каждого человека, отслеживать связи, управлять недвижимостью, транспортом, цифровыми аккаунтами и многое другое. Фвктичски проект можно развить в PRM — Personal Relationship Management
+### 🎯 Основные возможности
+- **Управление контактами** - полный CRUD для всех контактов
+- **Иерархия связей** - отслеживание отношений между людьми
+- **Детальное досье** - медицинская информация, физические параметры, документы
+- **Недвижимость** - управление объектами недвижимости (квартиры, дома, участки)
+- **Транспорт** - учет автомобилей, мотоциклов и другого транспорта
+- **Цифровые аккаунты** - хранение данных об аккаунтах в соцсетях и играх
+- **Дела и задачи** - планирование и отслеживание дел
+- **Медицинские записи** - хранение информации о здоровье
+- **Поиск и фильтрация** - быстрый поиск по контактам
+- **Адаптивный дизайн** - удобная работа на любых устройствах
+## 🚀 Технологии
 ### Frontend
+- **Vue 3** - прогрессивный JavaScript фреймворк
+- **Pinia** - управление состоянием
+- **Vite** - быстрая сборка и разработка
+- **Axios** - HTTP клиент
+- **SCSS** - препроцессор CSS
+### Backend
+- **FastAPI** - современный веб-фреймворк для Python
+- **SQLAlchemy** - ORM для работы с базой данных
+- **Pydantic** - валидация данных
+- **Uvicorn** - ASGI сервер
+- **PostgreSQL** - реляционная база данных
+### DevOps
+- **Docker** - контейнеризация
+- **Docker Compose** - оркестрация сервисов
+- **Nginx** - веб-сервер для статики
+## 📁 Структура проекта
 
-| Технология | Назначение |
-| -------------------- | ------------------------- |
-| HTML5 | Структура страниц |
-| Tailwind CSS | Утилитарный CSS-фреймворк |
-| JavaScript (ES6+) | Клиентская логика |
-| Font Awesome 6 | Иконки |
-| Google Fonts (Inter) | Шрифты |
+arc_agent/  
+├── backend/ # FastAPI бекенд  
+│ ├── main.py # Точка входа API  
+│ ├── models.py # SQLAlchemy модели  
+│ ├── schemas.py # Pydantic схемы  
+│ ├── crud.py # CRUD операции  
+│ ├── database.py # Настройка БД  
+│ ├── Dockerfile # Dockerfile для бекенда  
+│ └── requirements.txt # Python зависимости  
+├── frontend/ # Vue 3 фронтенд  
+│ ├── src/  
+│ │ ├── api/ # API клиенты  
+│ │ ├── components/ # Vue компоненты  
+│ │ │ ├── common/ # Общие компоненты  
+│ │ │ ├── modals/ # Модальные окна  
+│ │ │ └── tree/ # Компонент дерева  
+│ │ ├── composables/ # Хуки и логика  
+│ │ ├── stores/ # Pinia store  
+│ │ ├── types/ # TypeScript типы  
+│ │ ├── App.vue # Корневой компонент  
+│ │ └── main.ts # Точка входа  
+│ ├── index.html  
+│ ├── package.json  
+│ ├── Dockerfile  
+│ └── nginx.conf  
+├── docker-compose.yml # Docker Compose конфиг  
+└── README.md # Документация
 
-### Инфраструктура
+text
 
-| Технология | Назначение |
-| -------------- | --------------------------- |
-| Docker | Контейнеризация |
-| Docker Compose | Оркестрация |
-| Nginx | Веб-сервер для статики |
-| Traefik | Reverse proxy (опционально) |
-
----
-
-## Функциональные возможности
-
-### 👥 Управление контактами
-
-| Функция | Описание |
-| -------------- | -------------------------------------------- |
-| Создание | Добавление нового человека с полными данными |
-| Редактирование | Изменение любой информации о контакте |
-| Удаление | Полное удаление со всеми связями |
-| Поиск | Быстрый поиск по имени или короткому имени |
-| Сортировка | По важности, иерархии, дате, имени |
-
-### 📋 Досье контакта
-
-**Основная информация:**
-
-- Полное имя и короткое имя
-- Дата рождения и возраст
-- Пол
-- Адрес
-- Телефон и Email
-
-**Параметры тела:**
-
-- Рост и вес
-- Размер одежды и обуви
-- Объемы (грудь, талия, бедра)
-
-**Медицинские данные:**
-
-- Группа крови и резус-фактор
-- Аллергии
-- Хронические заболевания
-- Принимаемые лекарства
-- Давление и пульс
-
-**Документы:**
-
-- Паспортные данные
-- ИНН, СНИЛС
-- Водительские права (категория, номер)
-
-**Социальные параметры:**
-
-- Семейное положение
-- Количество детей
-- Образование
-- Профессия
-- Место работы
-
-**Предпочтения:**
-
-- Любимый цвет
-- Любимые цветы
-- Любимая еда
-- Любимая музыка
-- Любимые фильмы
-- Хобби
-
----
-
-## Структура проекта
-
-```text
-
-jade-archive/
-   ├── docker-compose.yml # Оркестрация контейнеров
-   ├── .env.example # Пример переменных окружения
-   ├── README.md # Документация
-   │
-   ├── backend/ # Бэкенд на FastAPI
-   │ ├── Dockerfile # Docker образ бэкенда
-   │ ├── requirements.txt # Python зависимости
-   │ ├── main.py # Главный файл приложения
-   │ ├── database.py # Подключение к БД
-   │ ├── models.py # SQLAlchemy модели
-   │ ├── schemas.py # Pydantic схемы + валидация
-   │ ├── crud.py # CRUD операции
-   │ ├── bot.py # Telegram бот
-   │ └── run_bot.py # Запуск бота отдельно
-   │
-   ├── frontend/ # Фронтенд
-   │ ├── Dockerfile # Docker образ фронтенда
-   │ ├── nginx.conf # Конфигурация Nginx
-   │ └── static/ # Статические файлы
-   │ ├── index.html # Главная страница
-   │ ├── css/
-   │ │ └── styles.css # Стили
-   │ └── js/
-   │ └── app.js # Клиентская логика
-   │
-   └── traefik/ # Traefik конфигурация (опционально)
-   └── traefik.yml
-
-```
-
----
-
-## Установка и запуск
-
-### Системные требования
-
-| Компонент | Минимальная версия |
-| --------------------- | --------------------- |
-| Docker | 20.10+ |
-| Docker Compose | 2.0+ |
-| RAM | 2 GB |
-| Дисковое пространство | 1 GB |
-| ОС | Windows, Linux, macOS |
-
-### Быстрый старт
-
-#### 1. Запуск через Docker Compose
-
+## 🛠️ Установка и запуск
+### Предварительные требования
+- **Node.js** 18+ и **npm** 9+
+- **Python** 3.11+
+- **Docker** и **Docker Compose** (опционально)
+- **PostgreSQL** 15+ (или использовать Docker)
+### 🐳 Запуск через Docker (рекомендуется)
 ```bash
+# Клонируем репозиторий
+git clone <repository-url>
+cd arc_agent
+# Запускаем все сервисы
+docker-compose up -d --build
+# Импортируем тестовые данные
+docker exec -it jade_app python import_data.py
 
-docker-compose  up  -d
+Приложение будет доступно:
 
-```
+-   **Фронтенд**: [http://localhost:3000](http://localhost:3000/)
+    
+-   **API**: [http://localhost:8000](http://localhost:8000/)
+    
+-   **Документация API**: [http://localhost:8000/docs](http://localhost:8000/docs)
+    
 
-#### 2. Доступ к приложению
+### 🖥️ Локальный запуск для разработки
 
-| Сервис | URL |
-| ---------------- | -------------------------- |
-| Веб-интерфейс | <http://localhost:3000> |
-| API | <http://localhost:8000> |
-| API Документация | <http://localhost:8000/docs> |
+#### 1. Запуск бекенда
 
----
+bash
 
-## Настройка под себя
+cd backend
+# Создаем виртуальное окружение
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# или
+venv\Scripts\activate     # Windows
+# Устанавливаем зависимости
+pip install -r requirements.txt
+# Запускаем сервер
+uvicorn main:app --reload --port 8000
 
-### Изменение портов
+#### 2. Запуск фронтенда
 
-В `docker-compose.yml` измените порты:
+bash
 
-```yaml
+cd frontend
+# Устанавливаем зависимости
+npm install
+# Запускаем в режиме разработки
+npm run dev
 
-services:
+#### 3. Настройка базы данных
 
-frontend:
+bash
 
-ports:
+# Запускаем PostgreSQL в Docker
+docker run -d --name postgres \
+ -e POSTGRES_USER=jade_user \
+ -e POSTGRES_PASSWORD=jade_password \
+ -e POSTGRES_DB=jade_archive \
+ -p 5432:5432 \
+ postgres:15
+# Импортируем тестовые данные
+python import_data.py
 
-- "8080:80"  # вместо 3000:80
+## 📊 API Эндпоинты
 
-app:
+Метод
 
-ports:
+Эндпоинт
 
-- "8001:8000"  # вместо 8000:8000
+Описание
 
-```
+GET
 
-### Кастомизация цветовой схемы
+`/api/health`
 
- В `frontend/static/css/styles.css` измените CSS переменные:
+Проверка здоровья API
 
-```css
+GET
 
- :root {
+`/api/persons`
 
- --jade-primary: #00a884;
+Список всех контактов
 
- --jade-primary-dark: #008b6e;
+GET
 
-}
+`/api/persons/{id}`
 
-```
+Получить контакт по ID
 
----
+POST
 
-## API Эндпоинты
+`/api/persons`
 
-Базовый URL: `http://localhost:8000/api`
+Создать новый контакт
 
-| Метод | Эндпоинт | Описание |
-|-------|----------|----------|
-| GET | `/health` | Проверка здоровья сервера |
-| GET | `/persons` | Получить список всех контактов |
-| GET | `/persons/{id}` | Получить контакт по ID |
-| POST | `/persons` | Создать новый контакт |
-| PUT | `/persons/{id}` | Обновить существующий контакт |
-| DELETE | `/persons/{id}` | Удалить контакт |
-| GET | `/search?q={query}` | Поиск контактов по имени |
-| GET | `/tree` | Получить иерархическое дерево контактов |
-| POST | `/relations` | Создать связь между контактами |
-| DELETE | `/relations/{id}` | Удалить связь |
-| POST | `/persons/{id}/social` | Добавить социальную сеть контакту |
-| DELETE | `/social/{id}` | Удалить социальную сеть |
-| POST | `/persons/{id}/tags` | Добавить тег/предпочтение |
-| DELETE | `/tags/{id}` | Удалить тег/предпочтение |
+PUT
 
----
+`/api/persons/{id}`
 
-## Telegram Бот
+Обновить контакт
 
-## Запуск ТГ бота
+DELETE
 
- docker exec -it jade_app python run_bot.py
+`/api/persons/{id}`
 
-### Команды бота
+Удалить контакт
 
-| Команда | Описание | Пример |
-|---------|----------|--------|
-| `/start` | Приветствие | `/start` |
-| `/help` | Помощь | `/help` |
-| `/contacts` | Список всех контактов | `/contacts` |
-| `/search <имя>` | Поиск контакта по имени | `/search Иван` |
-| `/view <id>` | Просмотр полного досье | `/view 1` |
-| `/add` | Добавление нового контакта (пошагово) | `/add` |
-| `/cancel` | Отмена текущего действия | `/cancel` |
+GET
 
----
+`/api/search?q={query}`
 
-## База данных
+Поиск контактов
 
-### Создание резервной копии PostgreSQL
+GET
 
-### Через docker exec (рекомендуется)
+`/api/relations`
 
-### Создать директорию для бэкапов
+Список всех связей
 
- mkdir ...\jade-archive\backups
+POST
 
-## Создать дамп базы данных
+`/api/relations`
 
- docker exec jade_db pg_dump -U jade_user jade_archive > ...\jade-archive\backups\jade_archive_backup_$(Get-Date -Format "yyyy-MM-dd_HH-mm").sql
+Создать связь
 
-## Или с понятным именем
+DELETE
 
- docker exec jade_db pg_dump -U jade_user jade_archive > backups\jade_archive_backup_latest.sql
+`/api/relations/{id}`
 
-### Восстановить базу данных
+Удалить связь
 
- docker exec -i jade_db psql -U jade_user jade_archive < backups\jade_archive_backup_latest.sql
+GET
 
-### Или с принудительным удалением существующей БД
+`/api/persons/{id}/relations`
 
- docker exec -i jade_db psql -U jade_user -c "DROP DATABASE jade_archive;"
- docker exec -i jade_db psql -U jade_user -c "CREATE DATABASE jade_archive;"
- docker exec -i jade_db psql -U jade_user jade_archive < backups\jade_archive_backup_latest.sql
+Связи контакта
 
-## Устранение проблем
+POST
 
-### 502 Bad Gateway
+`/api/persons/{id}/social`
 
-```bash
+Добавить соцсеть
 
- docker  logs  jade_app  --tail  50
+GET
 
- docker-compose  restart  app
+`/api/persons/{id}/digital-accounts`
 
-```
+Цифровые аккаунты
 
-### Порт уже занят
+POST
 
- Измените порты в `docker-compose.yml`
+`/api/persons/{id}/digital-accounts`
 
----
+Добавить аккаунт
+
+GET
+
+`/api/persons/{id}/real-estate`
+
+Недвижимость
+
+POST
+
+`/api/persons/{id}/real-estate`
+
+Добавить недвижимость
+
+GET
+
+`/api/persons/{id}/vehicles`
+
+Транспорт
+
+POST
+
+`/api/persons/{id}/vehicles`
+
+Добавить транспорт
+
+GET
+
+`/api/persons/{id}/cases`
+
+Дела
+
+POST
+
+`/api/persons/{id}/cases`
+
+Добавить дело
+
+GET
+
+`/api/persons/{id}/medical`
+
+Медицинские записи
+
+POST
+
+`/api/persons/{id}/medical`
+
+
+## 🤝 Вклад в проект
+
+1.  Форкните репозиторий
+    
+2.  Создайте ветку для фичи (`git checkout -b feature/amazing-feature`)
+    
+3.  Зафиксируйте изменения (`git commit -m 'Add some amazing feature'`)
+    
+4.  Запушьте ветку (`git push origin feature/amazing-feature`)
+    
+5.  Откройте Pull Request
+    
+## 📧 Контакты
+
+**Автор**: Korchagin Vladislav
+
+-   **Email**: corchagin.vlad2005@yandex.ru
+    
+-   **Telegram**: [@VLAD_K0R](https://t.me/VLAD_K0R)
+    
+-   **GitHub**: [Vladislav-Kor](https://github.com/Vladislav-Kor)
+    
+----------
+
+⭐ Поставьте звезду на GitHub, если проект вам полезен!
+
+text
+
+Также создадим файл `.env.example` для переменных окружения:
+```powershell
+notepad ...\.env.example
+
+env
+
+# Database
+DATABASE_URL=postgresql://jade_user:jade_password@db:5432/jade_archive
+POSTGRES_USER=jade_user
+POSTGRES_PASSWORD=jade_password
+POSTGRES_DB=jade_archive
+# Backend
+BACKEND_PORT=8000
+BACKEND_HOST=0.0.0.0
+# Frontend
+FRONTEND_PORT=3000
+VITE_API_URL=http://localhost:8000
+# Telegram Bot (опционально)
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_PROXY_URL=socks5://localhost:1080
+
+И файл `.gitignore`:
+
+powershell
+
+notepad ...\.gitignore
+
+gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.log
+*.sqlite3
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+dist-ssr/
+*.local
+# Environment
+.env
+.env.local
+.env.*.local
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+# Docker
+*.pid
+*.seed
+# Backups
+*.backup
+*.bak
+backups/
+# Misc
+*.tmp
+.cache/
+coverage/
+.nyc_output/

@@ -1,0 +1,234 @@
+﻿/* ============================================
+   JADE ARCHIVE - PREMIUM DARK THEME
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #060a08;
+    color: #e8f0ee;
+    overflow: hidden;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00c49a, #008b6e);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #00d9ab;
+}
+
+/* ===== APP ===== */
+.app {
+    display: flex;
+    height: 100vh;
+    background: #060a08;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 32px 40px;
+    overflow-y: auto;
+    height: 100vh;
+    background: 
+        radial-gradient(ellipse at 30% 20%, rgba(0, 196, 154, 0.04) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(0, 196, 154, 0.02) 0%, transparent 50%),
+        #060a08;
+}
+
+/* ===== WELCOME ===== */
+.welcome-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.welcome-card {
+    text-align: center;
+    padding: 60px 72px;
+    background: linear-gradient(145deg, rgba(13, 20, 17, 0.6), rgba(8, 12, 10, 0.8));
+    border: 1px solid rgba(0, 196, 154, 0.12);
+    border-radius: 32px;
+    backdrop-filter: blur(40px);
+    max-width: 480px;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at center, rgba(0, 196, 154, 0.03) 0%, transparent 60%);
+    animation: rotateGlow 20s linear infinite;
+}
+
+@keyframes rotateGlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.welcome-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    display: block;
+    position: relative;
+}
+
+.welcome-card h1 {
+    font-size: 28px;
+    font-weight: 300;
+    color: #e8f0ee;
+    margin-bottom: 8px;
+    letter-spacing: 3px;
+    position: relative;
+}
+
+.welcome-card h1 span {
+    background: linear-gradient(135deg, #00c49a, #008b6e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.welcome-card p {
+    color: #4a7a6a;
+    font-size: 14px;
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+    position: relative;
+}
+
+.welcome-btn {
+    padding: 12px 36px;
+    background: linear-gradient(135deg, #00c49a, #008b6e);
+    border: none;
+    border-radius: 12px;
+    color: #060a08;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 30px rgba(0, 196, 154, 0.2);
+    position: relative;
+}
+
+.welcome-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 40px rgba(0, 196, 154, 0.35);
+}
+
+/* ===== LOADING ===== */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 44px;
+    height: 44px;
+    border: 2px solid rgba(0, 196, 154, 0.1);
+    border-top-color: #00c49a;
+    border-radius: 50%;
+    animation: spin 0.8s cubic-bezier(0.6, 0, 0.4, 1) infinite;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-slide-up {
+    animation: fadeSlideUp 0.5s ease forwards;
+}
+
+/* ===== GLASS EFFECT ===== */
+.glass {
+    background: rgba(13, 20, 17, 0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 196, 154, 0.08);
+}
+
+/* ===== JADE TEXT ===== */
+.text-jade {
+    color: #00c49a;
+}
+.text-jade-light {
+    color: #4ecdc4;
+}
+.text-jade-glow {
+    text-shadow: 0 0 30px rgba(0, 196, 154, 0.15);
+}
+.btn-secondary {
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    color: #5a7a72;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn-primary {
+    flex: 1;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #00c49a, #008b6e);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    color: #23302d;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 16px;
+    }
+    .welcome-card {
+        padding: 40px 24px;
+    }
+}

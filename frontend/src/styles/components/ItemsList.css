@@ -1,0 +1,12 @@
+﻿.items-tab {
+    background: #0d1210;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid #1a2420;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}

@@ -1,0 +1,70 @@
+﻿.relations-tab {
+    background: #0d1210;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid #1a2420;
+}
+
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #1a2420;
+}
+
+.tab-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffd54f;
+}
+
+.add-btn {
+    padding: 6px 14px;
+    background: #1a2420;
+    border: 1px solid #2a3a35;
+    border-radius: 20px;
+    color: #00c49a;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.add-btn:hover {
+    background: #00c49a20;
+}
+
+.empty-block {
+    text-align: center;
+    padding: 60px 20px;
+    color: #5a6e68;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.secondary-btn {
+    margin-top: 16px;
+    padding: 8px 20px;
+    background: #1a2420;
+    border: 1px solid #2a3a35;
+    border-radius: 20px;
+    color: #00c49a;
+    cursor: pointer;
+}
+
+.relations-group {
+    margin-bottom: 24px;
+}
+
+.group-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #00c49a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
