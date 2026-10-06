@@ -2,12 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    default-libmysqlclient-dev \
-    build-essential \
-    pkg-config \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Системные пакеты не нужны: pymysql — чистый Python, у cryptography есть готовые колёса.
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
