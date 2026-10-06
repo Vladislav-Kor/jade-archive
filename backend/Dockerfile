@@ -1,4 +1,4 @@
-﻿FROM python:3.11-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -19,15 +19,9 @@ COPY . .
 RUN ls -la /app && ls -la /app/*.py
 
 
-RUN echo '#!/bin/bash\n\
-echo "⏳ Waiting for database..."\n\
-sleep 10\n\
-echo "🔄 Running migrations..."\n\
-alembic upgrade head\n\
-echo "🚀 Starting application..."\n\
-uvicorn main:app --host 0.0.0.0 --port 8000\n\
-' > /app/start.sh && chmod +x /app/start.sh
+# Таблицы создаёт init_db() при импорте main.py (с повторами подключения к БД).
+# alembic upgrade head здесь падал при каждом старте: схема 001_initial не совпадает с models.py.
 
 EXPOSE 8000
 
-CMD ["/app/start.sh"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
