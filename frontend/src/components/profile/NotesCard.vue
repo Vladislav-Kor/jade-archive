@@ -1,0 +1,36 @@
+﻿<template>
+  <div class="notes-card">
+    <div class="notes-header">📝 Заметки</div>
+    <div class="notes-text">{{ notes }}</div>
+  </div>
+</template>
+
+<script setup>
+defineProps({
+  notes: { type: String, required: true }
+})
+</script>
+
+<style scoped>
+.notes-card {
+  margin-top: 16px;
+  padding: 16px;
+  background: #0d1210;
+  border-radius: 16px;
+  border: 1px solid #1a2420;
+}
+.notes-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffd54f;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1a2420;
+}
+.notes-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #c0c0c0;
+  white-space: pre-wrap;
+}
+</style>

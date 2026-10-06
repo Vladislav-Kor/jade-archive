@@ -1,0 +1,9 @@
+# Не тащить в образ локальное окружение, тесты и секреты
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+tests/
+requirements-dev.txt
+.env
+*.sql

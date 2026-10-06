@@ -1,0 +1,38 @@
+﻿.profile-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #1a2420;
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 8px 20px;
+    background: none;
+    border: none;
+    border-radius: 20px;
+    color: #5a6e68;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.tab:hover {
+    color: #00c49a;
+}
+
+.tab.active {
+    background: #00c49a15;
+    color: #00c49a;
+}
+
+.tab-count {
+    background: #00c49a20;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 10px;
+}

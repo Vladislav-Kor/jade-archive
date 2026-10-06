@@ -71,6 +71,7 @@ config.ini
 secrets.yaml
 secrets.json
 credentials.json
+import_data.py
 token.json
 *.pem
 *.key
@@ -235,7 +236,8 @@ node_modules/
 npm-debug.log
 yarn-error.log
 yarn-debug.log
-package-lock.json
+# пустой package-lock.json в корне не нужен; frontend/package-lock.json нужен для npm ci в CI
+/package-lock.json
 yarn.lock
 dist/
 build/

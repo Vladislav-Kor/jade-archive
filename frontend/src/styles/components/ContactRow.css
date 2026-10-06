@@ -1,0 +1,95 @@
+﻿.contact-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 4px;
+}
+
+.contact-row:hover {
+    background: #1a2420;
+}
+
+.contact-row.active {
+    background: #00c49a15;
+    border-left: 2px solid #ffd54f;
+}
+
+.contact-avatar {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    background: #1a2420;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.avatar-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #00c49a;
+}
+
+.contact-rank {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 10px;
+    font-size: 8px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0e0c;
+}
+
+.contact-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.contact-nick {
+    font-size: 10px;
+    color: #5a6e68;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+}
+
+.contact-row:hover .contact-actions {
+    opacity: 1;
+}
+
+.contact-action {
+    background: #2a3a35;
+    border: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.contact-action:hover {
+    background: #00c49a;
+    color: #0a0e0c;
+}
