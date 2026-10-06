@@ -26,7 +26,7 @@
 - **SQLAlchemy** - ORM для работы с базой данных
 - **Pydantic** - валидация данных
 - **Uvicorn** - ASGI сервер
-- **PostgreSQL** - реляционная база данных
+- **MySQL 8** - реляционная база данных (PyMySQL)
 ### DevOps
 - **Docker** - контейнеризация
 - **Docker Compose** - оркестрация сервисов
@@ -68,7 +68,7 @@ text
 - **Node.js** 18+ и **npm** 9+
 - **Python** 3.11+
 - **Docker** и **Docker Compose** (опционально)
-- **PostgreSQL** 15+ (или использовать Docker)
+- **MySQL** 8 (или использовать Docker)
 ### 🐳 Запуск через Docker (рекомендуется)
 ```bash
 # Клонируем репозиторий
@@ -128,6 +128,41 @@ docker run -d --name postgres \
  postgres:15
 # Импортируем тестовые данные
 python import_data.py
+
+## ✅ Тесты и проверка
+
+Тесты не трогают рабочую базу `jade_archive`: бэкенд проверяется на отдельном MySQL в Docker.
+
+```bash
+# одноразовая тестовая база (данные только в памяти)
+docker run -d --name arc_test_db -p 127.0.0.1:3307:3306 --tmpfs /var/lib/mysql:rw -e MYSQL_ROOT_PASSWORD=test_root -e MYSQL_DATABASE=arc_test -e MYSQL_USER=arc_test -e MYSQL_PASSWORD=arc_test mysql:8
+
+cd backend
+python -m venv .venv && .venv/Scripts/pip install -r requirements.txt -r requirements-dev.txt
+.venv/Scripts/python -m pytest tests -q        # 27 тестов: каждый ресурс API
+
+cd ../frontend
+npm test                                      # 19 тестов: реактивные сторы и формы
+npm run build
+```
+
+Проверить интерфейс на тестовых данных, не трогая рабочие:
+`VITE_API_TARGET=http://localhost:8001 npx vite --port 3001` при бэкенде на 8001 с `DATABASE_URL` тестовой базы.
+
+## 💾 Резервная копия и откат
+
+```bash
+# копия рабочей базы (папка backups/ не попадает в git)
+docker exec jade_db mysqldump -ujade_user -pjade_password --single-transaction --no-tablespaces --routines --triggers --default-character-set=utf8mb4 jade_archive > backups/jade_archive_$(date +%Y%m%d_%H%M%S).sql
+
+# восстановление
+docker exec -i jade_db mysql -ujade_user -pjade_password --default-character-set=utf8mb4 jade_archive < backups/<файл>.sql
+
+# откат бэкенда на образ до исправлений
+docker tag arc_agent-app:before-fix-20261006 arc_agent-app:latest && docker compose up -d --no-deps --no-build app
+```
+
+⚠️ `backend/create_tables.py` удаляет **все** таблицы перед созданием — не запускайте его на рабочей базе.
 
 ## 📊 API Эндпоинты
 
@@ -303,7 +338,7 @@ notepad ...\.env.example
 env
 
 # Database
-DATABASE_URL=postgresql://jade_user:jade_password@db:5432/jade_archive
+DATABASE_URL=mysql+pymysql://jade_user:jade_password@db:3306/jade_archive?charset=utf8mb4
 POSTGRES_USER=jade_user
 POSTGRES_PASSWORD=jade_password
 POSTGRES_DB=jade_archive
