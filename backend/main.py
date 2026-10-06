@@ -190,6 +190,13 @@ def add_social_media(person_id: int, social: schemas.SocialMediaBase, db: Sessio
         raise HTTPException(status_code=404, detail="Person not found")
     return crud.add_social_media(db, person_id, social)
 
+@app.put("/api/social/{social_id}", response_model=schemas.SocialMediaResponse)
+def update_social_media(social_id: int, social: schemas.SocialMediaBase, db: Session = Depends(get_db)):
+    updated = crud.update_social_media(db, social_id, social)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Social media entry not found")
+    return updated
+
 @app.delete("/api/social/{social_id}")
 def delete_social_media(social_id: int, db: Session = Depends(get_db)):
     if not crud.delete_social_media(db, social_id):

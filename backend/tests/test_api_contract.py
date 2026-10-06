@@ -123,6 +123,17 @@ class TestSocial:
         assert client.delete(f"/api/social/{sid}").status_code == 200
         assert client.get(f"/api/persons/{pid}/social").json() == []
 
+    def test_update_keeps_the_same_record(self, client, person):
+        # Раньше интерфейс «редактировал» удалением и созданием — при сбое ссылка терялась.
+        sid = client.post(f"/api/persons/{person['id']}/social",
+                          json={"platform": "telegram", "link": "t.me/old"}).json()["id"]
+
+        updated = client.put(f"/api/social/{sid}", json={"platform": "telegram", "link": "t.me/new"})
+
+        assert updated.status_code == 200, updated.text
+        assert (updated.json()["id"], updated.json()["link"]) == (sid, "https://t.me/new")
+        assert client.put("/api/social/999999", json={"platform": "x", "link": "y"}).status_code == 404
+
     def test_social_for_missing_person_is_404(self, client):
         assert client.post("/api/persons/999999/social", json={"platform": "x", "link": "y"}).status_code == 404
 

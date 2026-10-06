@@ -316,6 +316,28 @@ def add_social_media(
         db.rollback()
         raise
 
+def update_social_media(
+    db: Session,
+    social_id: int,
+    social: schemas.SocialMediaBase
+) -> Optional[models.SocialMedia]:
+    try:
+        db_social = db.query(models.SocialMedia).filter(
+            models.SocialMedia.id == social_id
+        ).first()
+        if not db_social:
+            return None
+
+        db_social.platform = social.platform.strip()
+        db_social.link = social.link.strip()
+        db.commit()
+        db.refresh(db_social)
+        return db_social
+    except Exception as e:
+        logger.error(f"Error updating social media {social_id}: {e}")
+        db.rollback()
+        raise
+
 def delete_social_media(db: Session, social_id: int) -> bool:
     try:
         db_social = db.query(models.SocialMedia).filter(
